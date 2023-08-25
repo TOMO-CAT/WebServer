@@ -120,7 +120,7 @@ RetainHours=4
 
 按照 2 中的配置，日志每隔小时会切割成新的日志文件，并且最多保留 4 个小时的日志文件：
 
-![](image/image-20230514160346726.png)
+![rotate](image/image-20230514160346726.png)
 
 ### 4. 支持五种日志级别
 
@@ -160,7 +160,7 @@ $./build64_release/main/test
 
 在 VSCode、CLion 等主流的 IDE 中可以根据堆栈信息直接跳转到对应的函数地址：
 
-![](image/image-20230512225040755.png)
+![code-jump](image/image-20230512225040755.png)
 
 ### 5. 支持流式日志、格式化日志和 KV 日志等多种格式
 

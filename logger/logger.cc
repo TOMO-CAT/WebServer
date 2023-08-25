@@ -18,7 +18,8 @@
 #include "logger/backtrace.h"
 #include "logger/file_appender.h"
 #include "logger/log.h"
-#include "util/config/toml_helper.h"
+#include "util/toml/util.h"
+
 namespace logger {
 
 namespace {
@@ -65,7 +66,7 @@ void HandleSignal() {
 }  // namespace
 
 thread_local int t_pid = ::getpid();
-thread_local uint64_t t_traceid = 0;
+thread_local uint64_t t_trace_id = 0;
 
 Logger* Logger::instance_ = new Logger();
 
@@ -97,20 +98,20 @@ bool Logger::Init(const std::string& conf_path) {
   std::string dir;
   std::string file_name;
   int retain_hours;
-  if (util::ParseTomlValue(g, "Level", &level)) {
+  if (::util::toml::ParseTomlValue(g, "Level", &level)) {
     if (level >= static_cast<int>(Level::DEBUG_LEVEL) &&
         level <= static_cast<int>(Level::ERROR_LEVEL)) {
       priority_ = Level(level);
     }
   }
-  if (!util::ParseTomlValue(g, "Directory", &dir)) {
+  if (!::util::toml::ParseTomlValue(g, "Directory", &dir)) {
     dir = "./log";
   }
-  if (!util::ParseTomlValue(g, "FileName", &file_name)) {
+  if (!::util::toml::ParseTomlValue(g, "FileName", &file_name)) {
     LogWarn("parse FileName config fail, print to console");
     return false;
   }
-  if (!util::ParseTomlValue(g, "RetainHours", &retain_hours)) {
+  if (!::util::toml::ParseTomlValue(g, "RetainHours", &retain_hours)) {
     retain_hours = 0;  // don't delete overdue log file
   }
   file_appender_ = new FileAppender(dir, file_name, retain_hours, true);
@@ -234,20 +235,20 @@ std::string Logger::GenLogPrefix() {
   char time_str[100];
   snprintf(time_str, sizeof(time_str), "[%04d-%02d-%02d %02d:%02d:%02d.%06ld][%d:%lx]",
            tm_now.tm_year + 1900, tm_now.tm_mon + 1, tm_now.tm_mday, tm_now.tm_hour, tm_now.tm_min,
-           tm_now.tm_sec, now.tv_usec, t_pid, t_traceid);
+           tm_now.tm_sec, now.tv_usec, t_pid, t_trace_id);
   return time_str;
 }
 
 void Logger::set_trace_id(const uint64_t trace_id) {
   if (trace_id == 0) {
-    t_traceid = GenerateTraceId();
+    t_trace_id = GenerateTraceId();
   } else {
-    t_traceid = trace_id;
+    t_trace_id = trace_id;
   }
 }
 
 uint64_t Logger::trace_id() {
-  return t_traceid;
+  return t_trace_id;
 }
 
 }  // namespace logger

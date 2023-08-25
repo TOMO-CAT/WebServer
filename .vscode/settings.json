@@ -5,11 +5,28 @@
         "epoll",
         "EPOLLET",
         "EPOLLIN",
+        "glog",
         "gmock",
         "hdrs",
+        "lbacktrace",
+        "lcpputil",
+        "libcpputil",
+        "libuuid",
+        "luuid",
+        "nullptr",
+        "pdebug",
+        "SIGABRT",
+        "SIGCHLD",
+        "SIGFPE",
+        "SIGTTIN",
+        "SIGTTOU",
         "sptr",
         "srcs",
-        "WLOG"
+        "struct",
+        "sysdeps",
+        "sysv",
+        "WLOG",
+        "xmake"
     ],
     "files.associations": {
         "array": "cpp",
@@ -131,4 +148,8 @@
     "cSpell.enableFiletypes": [
         "!jsonc"
     ],
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.autopep8"
+    },
+    "python.formatting.provider": "none",
 }

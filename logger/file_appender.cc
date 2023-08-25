@@ -8,7 +8,7 @@
 #include <cstdio>
 #include <cstring>
 
-#include "util/macro_util.h"
+#include "util/macros/io.h"
 
 namespace logger {
 
@@ -31,7 +31,7 @@ FileAppender::~FileAppender() {
 bool FileAppender::Init() {
   int ret = mkdir(file_dir_.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
   if (ret != 0 && errno != EEXIST) {
-    printf2console("mkdir fail, dir:%s err:%s", file_dir_.c_str(), strerror(errno));
+    PRINT_TO_CONSOLE("mkdir fail, dir:%s err:%s", file_dir_.c_str(), strerror(errno));
     return false;
   }
   file_stream_.open(file_path_.c_str(), std::fstream::out | std::fstream::app);
@@ -80,10 +80,12 @@ int64_t FileAppender::GenHourSuffix(const struct timeval* tv) {
   struct tm tm_val;
   ::localtime_r(&tv->tv_sec, &tm_val);
   return static_cast<int64_t>(tm_val.tm_hour) + static_cast<int64_t>(tm_val.tm_mday) * 100 +
-         static_cast<int64_t>(tm_val.tm_mon + 1) * 10000 + static_cast<int64_t>(tm_val.tm_year + 1900) * 1000000;
+         static_cast<int64_t>(tm_val.tm_mon + 1) * 10000 +
+         static_cast<int64_t>(tm_val.tm_year + 1900) * 1000000;
   // 每分钟切割一次
   // return (static_cast<int64_t>(tm_val.tm_hour) + static_cast<int64_t>(tm_val.tm_mday) * 100 +
-  //         static_cast<int64_t>(tm_val.tm_mon + 1) * 10000 + static_cast<int64_t>(tm_val.tm_year + 1900) * 1000000) *
+  //         static_cast<int64_t>(tm_val.tm_mon + 1) * 10000 + static_cast<int64_t>(tm_val.tm_year +
+  //         1900) * 1000000) *
   //            100 +
   //        tm_val.tm_min;
 }
@@ -100,17 +102,18 @@ void FileAppender::CutIfNeed() {
   if (now_hour_suffix > last_hour_suffix_) {
     pthread_mutex_lock(&write_mutex_);
     if (now_hour_suffix > last_hour_suffix_) {
-      std::string new_file_path = file_path_ + "." + std::to_string(last_hour_suffix_);  // eg: logger.log.yyyymmddhh
+      std::string new_file_path =
+          file_path_ + "." + std::to_string(last_hour_suffix_);  // eg: logger.log.YYYYMMDDhh
       int ret = rename(file_path_.c_str(), new_file_path.c_str());
       if (ret != 0) {
-        printf2console("rename fail, old_file:%s new_file:%s err:%s", file_path_.c_str(), new_file_path.c_str(),
-                       strerror(errno));
+        PRINT_TO_CONSOLE("rename fail, old_file:%s new_file:%s err:%s", file_path_.c_str(),
+                         new_file_path.c_str(), strerror(errno));
       }
       file_stream_.close();
       file_stream_.open(file_path_.c_str(), std::fstream::out | std::fstream::app);
 #ifndef NDEBUG
-      printf2console("cut file, last hour:%ld now hour:%ld file_path:%s new_file_path:%s", last_hour_suffix_,
-                     now_hour_suffix, file_path_.c_str(), new_file_path.c_str());
+      printf2console("cut file, last hour:%ld now hour:%ld file_path:%s new_file_path:%s",
+                     last_hour_suffix_, now_hour_suffix, file_path_.c_str(), new_file_path.c_str());
 #endif
       // 只有需要删除历史日志时才记录历史文件
       if (retain_hours_ > 0) {
@@ -143,13 +146,13 @@ void FileAppender::DeleteOverdueFile(int64_t now_hour_suffix) {
 
   // 在循环中使用 erase 删除 set 元素会导致迭代器失效, 从而可能导致未定义的行为。
   // 因此在循环中删除 set 元素时, 应该使用迭代器进行删除, 而不是使用循环变量或者其他迭代器。
-  // 可以使用迭代器自身的后缀自增运算符 (iterator++) 来遍历集合, 并使用 iterator = set.erase(iterator) 来删除元素。
-  // 这样可以确保迭代器指向下一个有效元素。
+  // 可以使用迭代器自身的后缀自增运算符 (iterator++) 来遍历集合, 并使用 iterator =
+  // set.erase(iterator) 来删除元素。 这样可以确保迭代器指向下一个有效元素。
   for (auto it = history_files_.begin(); it != history_files_.end();) {
     int64_t hour_suffix = *it;
 #ifndef NDEBUG
-    printf2console("[debug] hour_suffix:%ld, now_hour_suffix:%ld, retain_hours=%d", hour_suffix, now_hour_suffix,
-                   retain_hours_);
+    printf2console("[debug] hour_suffix:%ld, now_hour_suffix:%ld, retain_hours=%d", hour_suffix,
+                   now_hour_suffix, retain_hours_);
 #endif
     if (now_hour_suffix > hour_suffix + retain_hours_) {
       std::string old_file_path = file_path_ + "." + std::to_string(hour_suffix);
