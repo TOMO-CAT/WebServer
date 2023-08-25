@@ -2,4 +2,9 @@ cc_config(
     cxxflags=['-std=c++17'],
     optimize='-O2',
     linkflags=[],
+    # 添加头文件目录
+    extra_incs=[
+        'thirdparty/cpptoml/include',
+        'thirdparty/gtest/include',
+    ],
 )

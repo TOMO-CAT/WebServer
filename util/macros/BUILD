@@ -1,0 +1,23 @@
+cc_library(
+    name='macros',
+    srcs=[
+    ],
+    hdrs=[
+        'util.h',
+        'io.h',
+        'class_design.h',
+    ],
+    deps=[
+    ],
+    visibility=['PUBLIC'],
+)
+
+cc_test(
+    name='macros_test',
+    srcs=[
+        'macros_test.cc',
+    ],
+    deps=[
+        ':macros',
+    ]
+)
