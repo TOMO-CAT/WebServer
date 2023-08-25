@@ -122,36 +122,5 @@ namespace logger {
 #define LOG_FATAL_IF(cond) \
   if (cond) LOG_FATAL
 
-/*
-#define LogInfo(fmt, args...)                                                                                 \
-  do {                                                                                                        \
-    logger::Logger::Instance()->Log(logger::Logger::Level::INFO_LEVEL, "[%s:%d][%s]" fmt, __FILE__, __LINE__, \
-                                    __FUNCTION__, ##args);                                                    \
-  } while (0)
-
-#define LogWarn(fmt, args...)                                                                                 \
-  do {                                                                                                        \
-    logger::Logger::Instance()->Log(logger::Logger::Level::WARN_LEVEL, "[%s:%d][%s]" fmt, __FILE__, __LINE__, \
-                                    __FUNCTION__, ##args);                                                    \
-  } while (0)
-
-#define LogError(fmt, args...)                                                                                 \
-  do {                                                                                                         \
-    logger::Logger::Instance()->Log(logger::Logger::Level::ERROR_LEVEL, "[%s:%d][%s]" fmt, __FILE__, __LINE__, \
-                                    __FUNCTION__, ##args);                                                     \
-  } while (0)
-
-#define LogErrorWithTag(tag, fmt, args...)                                                                             \
-  do {                                                                                                                 \
-    logger::Logger::Instance()->Log(logger::Logger::Level::ERROR_LEVEL, "[%s:%d][%s][tag=%s]" fmt, __FILE__, __LINE__, \
-                                    __FUNCTION__, tag, ##args);                                                        \
-  } while (0)
-
-#define LogFatal(fmt, args...)                                                                                 \
-  do {                                                                                                         \
-    logger::Logger::Instance()->Log(logger::Logger::Level::FATAL_LEVEL, "[%s:%d][%s]" fmt, __FILE__, __LINE__, \
-                                    __FUNCTION__, ##args);                                                     \
-  } while (0)
-*/
 
 }  // namespace logger

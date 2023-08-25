@@ -19,12 +19,9 @@ RUN sed -i 's/archive.ubuntu.com/mirrors.aliyun.com/g' /etc/apt/sources.list \
 # 指定工作目录
 WORKDIR /webserver
 
-# 安装 blade
-# 这种方法会为 root 账户安装 blade, 改到 docker.sh 中安装
-# RUN git clone https://github.com/chen3feng/blade-build.git --branch v2.0 --single-branch --depth=1 /blade-build && \
-#     cd /blade-build && \
-#     bash install && \
-#     # 单引号以纯字符串的方式写入 ~/.bashrc, 而不会被解释为变量或者命令
-#     echo 'export PATH=~/bin:$PATH' >> ~/.bashrc && \
-#     # cd .. && rm -rf /blade-build && \
-#     bash
+# 安装 VSCode 相关插件依赖的二进制
+RUN apt-get install -y --fix-missing \
+    python3-pip \
+    clangd \
+    clang-format \
+    && pip install cpplint \

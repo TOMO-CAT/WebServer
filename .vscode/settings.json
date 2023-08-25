@@ -1,5 +1,7 @@
 {
     "cSpell.words": [
+        "aliyun",
+        "Anson",
         "epoll",
         "EPOLLET",
         "EPOLLIN",
@@ -8,18 +10,6 @@
         "sptr",
         "srcs",
         "WLOG"
-    ],
-    "cpplint.lineLength": 180, // 设置行长度
-    "cpplint.filters": [
-        "-legal/copyright",
-        "-runtime/references",
-        "-whitespace/ending_newline",
-        "-build/include_subdir",
-        "-readability/todo",
-        "-build/include_order",
-        "-build/c++11",
-        "-readability/casting",
-        "-whitespace/line_length"
     ],
     "files.associations": {
         "array": "cpp",
@@ -124,5 +114,21 @@
     "markdownlint.ignore": [
         ".clang-format",
         "**/.clang-format"
+    ],
+    "cpplint.lineLength": 200, // 设置行长度
+    "cpplint.filters": [
+        "-legal/copyright",
+        // "-whitespace/ending_newline",
+        "-build/c++11",
+        // "-runtime/references",
+        // "-build/include_subdir",
+        // "-readability/todo",
+        // "-build/include_order",
+        // "-readability/casting",
+        // "-whitespace/line_length"
+    ],
+    "cpplint.cpplintPath": "/usr/bin/cpplint",
+    "cSpell.enableFiletypes": [
+        "!jsonc"
     ],
 }
