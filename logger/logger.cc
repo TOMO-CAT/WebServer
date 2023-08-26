@@ -24,10 +24,16 @@ namespace logger {
 
 namespace {
 
+/**
+ * @brief 生成 trace_id
+ *
+ * @note 将 uuid 解析成 uint64_t 数组并取第一个元素作为 trace_id
+ * @return uint64_t
+ */
 uint64_t GenerateTraceId() {
   uuid_t uuid;
   uuid_generate(uuid);
-  // 将 uuid 解析成 uint64_t 数组并取第一个元素作为 trace_id
+
   uint64_t* trace_id_list = reinterpret_cast<uint64_t*>(uuid);
   return trace_id_list[0];
 }
@@ -185,27 +191,6 @@ void Logger::Log(Level log_level, const char* fmt, ...) {
 #endif
   }
 }
-
-#if 0
-void Logger::Backtrace(const uint32_t skip_frames) {
-  constexpr uint32_t kMaxFrames = 128;
-  std::array<void*, kMaxFrames> call_stacks;
-
-  int32_t frame_size = ::backtrace(call_stacks.data(), kMaxFrames);
-  std::shared_ptr<char*> symbols(::backtrace_symbols(call_stacks.data(), frame_size), std::free);
-  if (symbols) {
-    for (int i = skip_frames; i < frame_size; ++i) {
-      printf("%s\n", (std::string("\t\t") + symbols.get()[i]).c_str());
-      file_appender_->Write((std::string("\t\t") + symbols.get()[i]).c_str());
-    }
-  }
-  if (frame_size == kMaxFrames) {
-    printf("\t\t[truncated]\n");
-    file_appender_->Write("\t\t[truncated]");
-  }
-  file_appender_->Write("\n\n");
-}
-#endif
 
 void Logger::Backtrace(const uint32_t skip_frames) {
   std::vector<std::string> stack_frames;

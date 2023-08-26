@@ -33,8 +33,6 @@ class Logger {
   void Log(Level log_level, const char* fmt, ...);
 
  public:
-  // static void set_trace_id(uint64_t trace_id = 0);
-  // static uint64_t trace_id();
   static void set_trace_id(const uint64_t trace_id = 0);
   static uint64_t trace_id();
 

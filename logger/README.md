@@ -453,7 +453,7 @@ $./build64_release/main/test
 
 常见的 DEBUG 方法，只打印前 N 条日志：
 
-```bash
+```c++
 #include <signal.h>
 
 #include "logger/log.h"
