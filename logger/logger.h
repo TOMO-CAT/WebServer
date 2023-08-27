@@ -1,22 +1,16 @@
 #pragma once
 
 #include <atomic>
+#include <memory>
 #include <string>
 
 #include "logger/file_appender.h"
+#include "logger/log_appender.h"
 
 namespace logger {
 
 class Logger {
  public:
-  enum class Level {
-    DEBUG_LEVEL,
-    INFO_LEVEL,
-    WARN_LEVEL,
-    ERROR_LEVEL,
-    FATAL_LEVEL,
-  };
-
   /**
    * 初始化, 未初始化或初始化失败时日志会输出到控制台
    */
@@ -49,10 +43,13 @@ class Logger {
  private:
   static Logger* instance_;
   bool is_console_output_ = true;
-  FileAppender* file_appender_ = nullptr;
-  FileAppender* crash_file_appender_ = nullptr;
+  std::unique_ptr<LogAppender> log_appender_ = nullptr;
   Level priority_ = Level::DEBUG_LEVEL;
   std::atomic<bool> receive_fatal_ = {false};
+
+ private:
+  static constexpr uint32_t kBufferSize = 4096;
+  static __thread char buffer_[kBufferSize];
 
  private:
   DISALLOW_COPY_AND_ASSIGN(Logger);

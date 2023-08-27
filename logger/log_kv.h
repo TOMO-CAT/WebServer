@@ -9,8 +9,8 @@ namespace logger {
 
 class LoggerKV {
  public:
-  LoggerKV(const Logger::Level level, const std::string& file, const uint32_t line, const std::string& function,
-           const std::string& prefix);
+  LoggerKV(const Level level, const std::string& file, const uint32_t line,
+           const std::string& function, const std::string& prefix);
   ~LoggerKV();
 
  public:
@@ -26,7 +26,7 @@ class LoggerKV {
   static constexpr char kSeparator[] = "||";
   std::ostringstream sstream_;
 
-  Logger::Level level_;
+  Level level_;
   std::string file_;
   uint32_t line_ = 0;
   std::string function_;

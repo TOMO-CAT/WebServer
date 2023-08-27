@@ -46,8 +46,10 @@ bool StackDumper::Dump(std::vector<std::string>* const stack_frames) {
       .frame_depth = 0,
       .res = stack_frames,
   };
-  struct backtrace_state* state = ::backtrace_create_state(exec_path_.c_str(), 1, this->ErrorCallback, nullptr);
-  ::backtrace_full(state, skip_, this->BacktraceCallback, this->ErrorCallback, reinterpret_cast<void*>(&bc));
+  struct backtrace_state* state =
+      ::backtrace_create_state(exec_path_.c_str(), 1, this->ErrorCallback, nullptr);
+  ::backtrace_full(state, skip_, this->BacktraceCallback, this->ErrorCallback,
+                   reinterpret_cast<void*>(&bc));
   return true;
 }
 
@@ -55,7 +57,8 @@ void StackDumper::ErrorCallback(void* data, const char* msg, int errnum) {
   std::cerr << msg << std::endl;
 }
 
-int StackDumper::BacktraceCallback(void* data, uintptr_t pc, const char* file, int line, const char* func) {
+int StackDumper::BacktraceCallback(void* data, uintptr_t pc, const char* file, int line,
+                                   const char* func) {
   BacktraceContext* ptr_bc = reinterpret_cast<BacktraceContext*>(data);
   return ptr_bc->sd->Backtrace(file, line, func, &ptr_bc->frame_depth, ptr_bc->res);
 }
@@ -92,7 +95,8 @@ int StackDumper::Backtrace(const char* file, int line, const char* func, uint32_
     }
   }
 
-  oss << '#' << (*count) << " [" << (file ? file : "???") << ':' << line << "][" << (func ? func : "???") << ']';
+  oss << '#' << (*count) << " [" << (file ? file : "???") << ':' << line << "]["
+      << (func ? func : "???") << ']';
   (*count)++;
   stacks->emplace_back(oss.str());
   if (p && p != demangle_buff_) {

@@ -3,14 +3,15 @@
 #include <sstream>
 #include <string>
 
+#include "logger/log_level.h"
 #include "logger/logger.h"
 
 namespace logger {
 
 class LogCapture {
  public:
-  LogCapture(const Logger::Level level, const std::string& file, const uint32_t line, const std::string& function,
-             const std::string& check_expression = "");
+  LogCapture(const Level level, const std::string& file, const uint32_t line,
+             const std::string& function, const std::string& check_expression = "");
   ~LogCapture();
 
  public:
@@ -19,7 +20,7 @@ class LogCapture {
  private:
   std::ostringstream sstream_;
 
-  Logger::Level level_;
+  Level level_;
   std::string file_;
   uint32_t line_;
   std::string function_;

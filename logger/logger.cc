@@ -18,9 +18,14 @@
 #include "logger/backtrace.h"
 #include "logger/file_appender.h"
 #include "logger/log.h"
+#include "logger/log_appender.h"
+#include "logger/log_level.h"
+#include "logger/log_message.h"
 #include "util/toml/util.h"
 
 namespace logger {
+
+__thread char Logger::buffer_[Logger::kBufferSize];
 
 namespace {
 
@@ -38,19 +43,21 @@ uint64_t GenerateTraceId() {
   return trace_id_list[0];
 }
 
-const std::unordered_map<Logger::Level, std::string> kLevel2Description = {
-    {Logger::Level::DEBUG_LEVEL, "[DEBUG]"}, {Logger::Level::INFO_LEVEL, "[INFO]"},
-    {Logger::Level::WARN_LEVEL, "[WARN]"},   {Logger::Level::ERROR_LEVEL, "[ERROR]"},
-    {Logger::Level::FATAL_LEVEL, "[FATAL]"},
+const std::unordered_map<Level, std::string> kLevel2Description = {
+    {Level::DEBUG_LEVEL, "[DEBUG]"}, {Level::INFO_LEVEL, "[INFO]"},   {Level::WARN_LEVEL, "[WARN]"},
+    {Level::ERROR_LEVEL, "[ERROR]"}, {Level::FATAL_LEVEL, "[FATAL]"},
 };
 
 constexpr uint32_t kSkipFrames = 3;
 
+/**
+ * @brief 注册信号处理函数
+ *
+ */
 void HandleSignal() {
   auto handler = [](int signal) {
     printf("receive signal: %d\n", signal);
-    Logger::Instance()->Log(Logger::Level::FATAL_LEVEL, "Exiting due to receive signal: %d",
-                            signal);
+    Logger::Instance()->Log(Level::FATAL_LEVEL, "Exiting due to receive signal: %d", signal);
     exit(0);
   };
 
@@ -76,22 +83,18 @@ thread_local uint64_t t_trace_id = 0;
 
 Logger* Logger::instance_ = new Logger();
 
-Logger::Logger() : is_console_output_(true), file_appender_(nullptr) {
-  // 注册信号处理函数
+Logger::Logger() : is_console_output_(true) {
   HandleSignal();
 }
 
 Logger::~Logger() {
-  if (file_appender_) {
-    delete file_appender_;
-  }
-
-  if (crash_file_appender_) {
-    delete crash_file_appender_;
+  if (log_appender_) {
+    log_appender_->Shutdown();
   }
 }
 
 bool Logger::Init(const std::string& conf_path) {
+  // 解析配置
   std::shared_ptr<cpptoml::table> g;
   try {
     g = cpptoml::parse_file(conf_path);
@@ -105,8 +108,7 @@ bool Logger::Init(const std::string& conf_path) {
   std::string file_name;
   int retain_hours;
   if (::util::toml::ParseTomlValue(g, "Level", &level)) {
-    if (level >= static_cast<int>(Level::DEBUG_LEVEL) &&
-        level <= static_cast<int>(Level::ERROR_LEVEL)) {
+    if (level >= static_cast<int>(Level::DEBUG_LEVEL) && level <= static_cast<int>(Level::ERROR_LEVEL)) {
       priority_ = Level(level);
     }
   }
@@ -118,16 +120,16 @@ bool Logger::Init(const std::string& conf_path) {
     return false;
   }
   if (!::util::toml::ParseTomlValue(g, "RetainHours", &retain_hours)) {
-    retain_hours = 0;  // don't delete overdue log file
+    retain_hours = 0;  // retain_hours 为 0 时不会删除过期日志
   }
-  file_appender_ = new FileAppender(dir, file_name, retain_hours, true);
-  if (!file_appender_->Init()) {
+
+  // 构造 log_appender_ 进行日志落盘
+  log_appender_ = std::make_unique<FileAppender>(dir, file_name, retain_hours, true);
+  if (!log_appender_->Init()) {
     return false;
   }
-  crash_file_appender_ = new FileAppender(dir, file_name + ".fatal", 0, false);
-  if (!crash_file_appender_->Init()) {
-    return false;
-  }
+
+  // 默认不打印到控制台
   is_console_output_ = false;
 
   return true;
@@ -164,16 +166,17 @@ void Logger::Log(Level log_level, const char* fmt, ...) {
 
   {
     va_start(args, fmt);
-    if (file_appender_) {
-      file_appender_->Write(new_fmt.c_str(), args);
-    }
-    va_end(args);
-  }
-
-  {
-    va_start(args, fmt);
-    if (crash_file_appender_ && log_level >= Level::FATAL_LEVEL) {
-      crash_file_appender_->Write(new_fmt.c_str(), args);
+    if (log_appender_) {
+      // https://stackoverflow.com/questions/36120717/correcting-format-string-is-not-a-string-literal-warning
+#if defined(__has_warning)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wformat-nonliteral"
+#endif
+      ::vsnprintf(buffer_, sizeof(buffer_), fmt, args);
+#if defined(__has_warning)
+#pragma clang diagnostic pop
+#endif
+      log_appender_->Write(std::make_shared<LogMessage>(buffer_));
     }
     va_end(args);
   }
@@ -204,11 +207,8 @@ void Logger::Backtrace(const uint32_t skip_frames) {
     output << "\t\t" << sf << '\n';
   }
   printf("%s", output.str().c_str());
-  if (file_appender_) {
-    file_appender_->Write(output.str().c_str());
-  }
-  if (crash_file_appender_) {
-    crash_file_appender_->Write(output.str().c_str());
+  if (log_appender_) {
+    log_appender_->Write(std::make_shared<LogMessage>(output.str()));
   }
 }
 
@@ -218,9 +218,9 @@ std::string Logger::GenLogPrefix() {
   struct tm tm_now;
   ::localtime_r(&now.tv_sec, &tm_now);
   char time_str[100];
-  snprintf(time_str, sizeof(time_str), "[%04d-%02d-%02d %02d:%02d:%02d.%06ld][%d:%lx]",
-           tm_now.tm_year + 1900, tm_now.tm_mon + 1, tm_now.tm_mday, tm_now.tm_hour, tm_now.tm_min,
-           tm_now.tm_sec, now.tv_usec, t_pid, t_trace_id);
+  snprintf(time_str, sizeof(time_str), "[%04d-%02d-%02d %02d:%02d:%02d.%06ld][%d:%lx]", tm_now.tm_year + 1900,
+           tm_now.tm_mon + 1, tm_now.tm_mday, tm_now.tm_hour, tm_now.tm_min, tm_now.tm_sec, now.tv_usec, t_pid,
+           t_trace_id);
   return time_str;
 }
 

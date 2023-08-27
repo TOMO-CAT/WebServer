@@ -8,6 +8,10 @@
 
 namespace logger {
 
+/**
+ * @brief 打印函数调用栈
+ *
+ */
 class StackDumper {
  public:
   explicit StackDumper(uint32_t skip);
@@ -30,7 +34,6 @@ class StackDumper {
   uint32_t skip_ = 0;
   std::string exec_path_;
   char* demangle_buff_ = nullptr;
-  // std::vector<std::string> stack_;
 
   DISALLOW_COPY_AND_ASSIGN(StackDumper);
 };

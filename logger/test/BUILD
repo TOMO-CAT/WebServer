@@ -1,30 +1,3 @@
-cc_binary(
-    name='file_appender_test',
-    srcs=[
-        'file_appender_test.cpp',
-    ],
-    deps=[
-        '//util:util',
-        '//util/time:time',
-        '//logger:logger',
-    ],
-    visibility=['PUBLIC'],
-)
-
-cc_binary(
-    name='crash_file_appender_test',
-    srcs=[
-        'crash_file_appender_test.cpp',
-    ],
-    deps=[
-        '//util:util',
-        '//util/time:time',
-        '//logger:logger',
-    ],
-    visibility=['PUBLIC'],
-)
-
-
 gen_rule(
     name='logger_test_gen',
     srcs=[
@@ -50,31 +23,6 @@ cc_binary(
     extra_cppflags=[
         '-rdynamic',
     ],
-)
-
-cc_binary(
-    name='backtrace_test',
-    srcs=[
-        'backtrace_test.cc',
-    ],
-    deps=[
-        '//thirdparty/backtrace:backtrace'
-    ],
-    # extra_cppflags=[
-    #     '-rdynamic', '-g',
-    # ],
-    # 打印出完整的调用栈, 防止编译将简单函数内联化
-    optimize=['-O1'],
-)
-
-cc_test(
-    name='backtrace2_test',
-    srcs=[
-        'backtrace2_test.cc',
-    ],
-    deps=[
-        '//logger:logger',
-    ]
 )
 
 
