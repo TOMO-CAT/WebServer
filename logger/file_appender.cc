@@ -40,22 +40,6 @@ bool FileAppender::OpenFile() {
   return true;
 }
 
-// void FileAppender::Write(const std::shared_ptr<LogMessage>& log_message) {
-//   // 将创建文件的时机延迟到第一次写日志的时候
-//   if (!is_receive_first_log) {
-//     this->OpenFile();
-//     is_receive_first_log = true;
-//   }
-
-//   CutIfNeed();
-//   pthread_mutex_lock(&write_mutex_);
-//   if (file_stream_.is_open()) {
-//     file_stream_ << log_message->ToString() << "\n";
-//     file_stream_.flush();
-//   }
-//   pthread_mutex_unlock(&write_mutex_);
-// }
-
 void FileAppender::DumpToDisk(const std::string& log_content) {
   // 将创建文件的时机延迟到第一次写日志的时候
   if (!is_receive_first_log) {

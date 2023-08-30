@@ -123,10 +123,13 @@ bool Logger::Init(const std::string& conf_path) {
     is_async = false;
   }
 
-  // 构造 log_appender_ 进行日志落盘
-  // log_appender_ = std::make_unique<SyncFileAppender>(dir, file_name, retain_hours, true);
-  // 测试异步日志
-  log_appender_ = std::make_unique<AsyncFileAppender>(dir, file_name, retain_hours, is_async);
+  // 构造 log_appender_ 进行日志落盘, 支持同步日志和异步日志两种方式
+  if (is_async) {
+    log_appender_ = std::make_unique<AsyncFileAppender>(dir, file_name, retain_hours, is_async);
+  } else {
+    log_appender_ = std::make_unique<SyncFileAppender>(dir, file_name, retain_hours, true);
+  }
+
   if (!log_appender_->Init()) {
     return false;
   }
