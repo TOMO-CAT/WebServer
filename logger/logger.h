@@ -37,8 +37,8 @@ class Logger {
  private:
   static std::string GenLogPrefix();
 
- private:
-  void Backtrace(const uint32_t skip_frames = 1);
+  //  private:
+  //   void Backtrace(const uint32_t skip_frames = 1);
 
  private:
   static Logger* instance_;

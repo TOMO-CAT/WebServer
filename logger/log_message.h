@@ -8,7 +8,7 @@ namespace logger {
 
 class LogMessage final {
  public:
-  explicit LogMessage(const std::string& msg) : msg_(msg) {
+  LogMessage(const Level level, const std::string& msg) : msg_(msg), level_(level) {
   }
   ~LogMessage() = default;
 
@@ -17,8 +17,13 @@ class LogMessage final {
     return msg_;
   }
 
+  Level level() {
+    return level_;
+  }
+
  private:
   std::string msg_;
+  Level level_ = Level::INFO_LEVEL;
 };
 
 }  // namespace logger

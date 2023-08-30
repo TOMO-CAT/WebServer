@@ -19,16 +19,14 @@ FileAppender::FileAppender(std::string dir, std::string file_name, int retain_ho
     file_dir_ = ".";
   }
   file_path_ = file_dir_ + "/" + file_name_ + "." + std::to_string(::getpid());
+  last_hour_suffix_ = GenNowHourSuffix();
+  pthread_mutex_init(&write_mutex_, nullptr);
 }
 
 FileAppender::~FileAppender() {
-  Shutdown();
-}
-
-bool FileAppender::Init() {
-  last_hour_suffix_ = GenNowHourSuffix();
-  pthread_mutex_init(&write_mutex_, nullptr);
-  return true;
+  if (file_stream_.is_open()) {
+    file_stream_.close();
+  }
 }
 
 bool FileAppender::OpenFile() {
@@ -42,13 +40,23 @@ bool FileAppender::OpenFile() {
   return true;
 }
 
-void FileAppender::Shutdown() {
-  if (file_stream_.is_open()) {
-    file_stream_.close();
-  }
-}
+// void FileAppender::Write(const std::shared_ptr<LogMessage>& log_message) {
+//   // 将创建文件的时机延迟到第一次写日志的时候
+//   if (!is_receive_first_log) {
+//     this->OpenFile();
+//     is_receive_first_log = true;
+//   }
 
-void FileAppender::Write(const std::shared_ptr<LogMessage>& log_message) {
+//   CutIfNeed();
+//   pthread_mutex_lock(&write_mutex_);
+//   if (file_stream_.is_open()) {
+//     file_stream_ << log_message->ToString() << "\n";
+//     file_stream_.flush();
+//   }
+//   pthread_mutex_unlock(&write_mutex_);
+// }
+
+void FileAppender::DumpToDisk(const std::string& log_content) {
   // 将创建文件的时机延迟到第一次写日志的时候
   if (!is_receive_first_log) {
     this->OpenFile();
@@ -58,7 +66,7 @@ void FileAppender::Write(const std::shared_ptr<LogMessage>& log_message) {
   CutIfNeed();
   pthread_mutex_lock(&write_mutex_);
   if (file_stream_.is_open()) {
-    file_stream_ << log_message->ToString() << "\n";
+    file_stream_ << log_content << "\n";
     file_stream_.flush();
   }
   pthread_mutex_unlock(&write_mutex_);

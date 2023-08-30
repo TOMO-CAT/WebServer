@@ -8,6 +8,7 @@
 
 #include <array>
 #include <cstdarg>
+#include <iostream>
 #include <memory>
 #include <sstream>
 #include <string>
@@ -16,11 +17,11 @@
 
 #include "cpptoml/cpptoml.h"
 #include "logger/backtrace.h"
-#include "logger/file_appender.h"
 #include "logger/log.h"
 #include "logger/log_appender.h"
 #include "logger/log_level.h"
 #include "logger/log_message.h"
+#include "logger/sync_file_appender.h"
 #include "util/toml/util.h"
 
 namespace logger {
@@ -48,7 +49,7 @@ const std::unordered_map<Level, std::string> kLevel2Description = {
     {Level::ERROR_LEVEL, "[ERROR]"}, {Level::FATAL_LEVEL, "[FATAL]"},
 };
 
-constexpr uint32_t kSkipFrames = 3;
+// constexpr uint32_t kSkipFrames = 3;
 
 /**
  * @brief 注册信号处理函数
@@ -103,10 +104,11 @@ bool Logger::Init(const std::string& conf_path) {
     return false;
   }
 
-  int level;
+  int level = 1;
   std::string dir;
   std::string file_name;
   int retain_hours;
+  bool is_async = false;  // 默认是同步日志
   if (::util::toml::ParseTomlValue(g, "Level", &level)) {
     if (level >= static_cast<int>(Level::DEBUG_LEVEL) && level <= static_cast<int>(Level::ERROR_LEVEL)) {
       priority_ = Level(level);
@@ -122,9 +124,12 @@ bool Logger::Init(const std::string& conf_path) {
   if (!::util::toml::ParseTomlValue(g, "RetainHours", &retain_hours)) {
     retain_hours = 0;  // retain_hours 为 0 时不会删除过期日志
   }
+  if (!::util::toml::ParseTomlValue(g, "IsAsync", &is_async)) {
+    is_async = false;
+  }
 
   // 构造 log_appender_ 进行日志落盘
-  log_appender_ = std::make_unique<FileAppender>(dir, file_name, retain_hours, true);
+  log_appender_ = std::make_unique<SyncFileAppender>(dir, file_name, retain_hours, true);
   if (!log_appender_->Init()) {
     return false;
   }
@@ -176,41 +181,57 @@ void Logger::Log(Level log_level, const char* fmt, ...) {
 #if defined(__has_warning)
 #pragma clang diagnostic pop
 #endif
-      log_appender_->Write(std::make_shared<LogMessage>(buffer_));
+      if (log_level != Level::FATAL_LEVEL) {
+        log_appender_->Write(std::make_shared<LogMessage>(log_level, buffer_));
+      } else {
+#ifdef NDEBUG
+        std::string fatal_log = buffer_ + Backtrace();
+        // RELEASE 模式下不可重入, 防止打印多个 FATAL 日志
+        if (!receive_fatal_.exchange(true)) {
+          printf("%s", fatal_log.c_str());
+          log_appender_->Write(std::make_shared<LogMessage>(log_level, fatal_log));
+        }
+#else
+        // DEBUG 模式下不触发 abort, 可以打印多个 FATAL 堆栈
+        printf("%s", fatal_log.c_str());
+        log_appender_->Write(std::make_shared<LogMessage>(log_level, fatal_log));
+#endif
+      }
     }
     va_end(args);
   }
 
-  if (log_level == Level::FATAL_LEVEL) {
-#ifdef NDEBUG
-    // RELEASE 模式下不可重入, 防止打印多个 FATAL 日志
-    if (!receive_fatal_.exchange(true)) {
-      Backtrace();
-      exit(0);
-    }
-#else
-    // DEBUG 模式下不触发 abort, 可以打印多个 FATAL 堆栈
-    Backtrace();
-#endif
-  }
+  //   // TODO(cat): 需要把 FATAL 日志退出的逻辑延后, 否则异步日志不会打全就直接退出了
+
+  //   if (log_level == Level::FATAL_LEVEL) {
+  // #ifdef NDEBUG
+  //     // RELEASE 模式下不可重入, 防止打印多个 FATAL 日志
+  //     if (!receive_fatal_.exchange(true)) {
+  //       Backtrace();
+  //     }
+  // #else
+  //     // DEBUG 模式下不触发 abort, 可以打印多个 FATAL 堆栈
+  //     Backtrace();
+  // #endif
+  //   }
 }
 
-void Logger::Backtrace(const uint32_t skip_frames) {
-  std::vector<std::string> stack_frames;
-  if (!StackDumper(kSkipFrames).Dump(&stack_frames)) {
-    printf("\t\tdump backtrace fail");
-    return;
-  }
+// void Logger::Backtrace(const uint32_t skip_frames) {
+//   std::vector<std::string> stack_frames;
+//   if (!StackDumper(kSkipFrames).Dump(&stack_frames)) {
+//     printf("\t\tdump backtrace fail");
+//     return;
+//   }
 
-  std::ostringstream output;
-  for (auto&& sf : stack_frames) {
-    output << "\t\t" << sf << '\n';
-  }
-  printf("%s", output.str().c_str());
-  if (log_appender_) {
-    log_appender_->Write(std::make_shared<LogMessage>(output.str()));
-  }
-}
+//   std::ostringstream output;
+//   for (auto&& sf : stack_frames) {
+//     output << "\t\t" << sf << '\n';
+//   }
+//   printf("%s", output.str().c_str());
+//   if (log_appender_) {
+//     log_appender_->Write(std::make_shared<LogMessage>(Level::ERROR_LEVEL, output.str()));
+//   }
+// }
 
 std::string Logger::GenLogPrefix() {
   struct timeval now;

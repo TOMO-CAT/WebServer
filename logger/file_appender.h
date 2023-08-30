@@ -12,10 +12,10 @@
 namespace logger {
 
 /**
- * @brief 将日志同步写入到磁盘文件中
+ * @brief 将日志写入到磁盘文件中, 支持日志定时切割和删除过期日志
  *
  */
-class FileAppender final : public LogAppender {
+class FileAppender : public LogAppender {
  public:
   /**
    * @brief Construct a new File Appender object
@@ -29,10 +29,7 @@ class FileAppender final : public LogAppender {
   virtual ~FileAppender();
 
  public:
-  bool Init() override;
-  void Shutdown() override;
-  // void Write(const char* fmt, va_list args) override;
-  void Write(const std::shared_ptr<LogMessage>& log_message) override;
+  void DumpToDisk(const std::string& log_content);
 
  private:
   static int64_t GenNowHourSuffix();
@@ -40,9 +37,6 @@ class FileAppender final : public LogAppender {
   void CutIfNeed();
   void DeleteOverdueFile(int64_t now_hour_suffix);
   bool OpenFile();
-
- private:
-  static constexpr uint32_t kFileAppenderBuffSize = 4096;
 
  private:
   std::fstream file_stream_;

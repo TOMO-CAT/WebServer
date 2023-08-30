@@ -6,6 +6,7 @@ cc_library(
         'log_kv.cc',
         'logger.cc',
         'backtrace.cc',
+        'sync_file_appender.cc',
     ],
     hdrs=[
         'file_appender.h',
@@ -14,6 +15,7 @@ cc_library(
         'log_kv.h',
         'logger.h',
         'backtrace.h',
+        'sync_file_appender.h',
     ],
     deps=[
         '//util/toml:toml',
