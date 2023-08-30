@@ -67,7 +67,7 @@ void HandleSignal() {
   signal(SIGPIPE, SIG_IGN);
   signal(SIGTTOU, SIG_IGN);
   signal(SIGTTIN, SIG_IGN);
-  signal(SIGCHLD, SIG_IGN);
+  // signal(SIGCHLD, SIG_IGN);
   signal(SIGTERM, SIG_IGN);
 
   signal(SIGBUS, handler);   // 10: Bus error (bad memory access)
@@ -146,9 +146,11 @@ void Logger::Log(Level log_level, const char* fmt, ...) {
   }
 
   std::string new_fmt = GenLogPrefix() + kLevel2Description.at(log_level) + fmt;
+  // FATAL 日志需要打印堆栈
   if (log_level == Level::FATAL_LEVEL) {
     new_fmt += "\n\tExiting due to FATAL log";
     new_fmt += "\n\tCall Stack:";
+    new_fmt += "\n" + Backtrace();
   }
 
   va_list args;
@@ -177,26 +179,27 @@ void Logger::Log(Level log_level, const char* fmt, ...) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wformat-nonliteral"
 #endif
-      ::vsnprintf(buffer_, sizeof(buffer_), fmt, args);
+      ::vsnprintf(buffer_, sizeof(buffer_), new_fmt.c_str(), args);
 #if defined(__has_warning)
 #pragma clang diagnostic pop
 #endif
-      if (log_level != Level::FATAL_LEVEL) {
-        log_appender_->Write(std::make_shared<LogMessage>(log_level, buffer_));
-      } else {
-#ifdef NDEBUG
-        std::string fatal_log = buffer_ + Backtrace();
-        // RELEASE 模式下不可重入, 防止打印多个 FATAL 日志
-        if (!receive_fatal_.exchange(true)) {
-          printf("%s", fatal_log.c_str());
-          log_appender_->Write(std::make_shared<LogMessage>(log_level, fatal_log));
-        }
-#else
-        // DEBUG 模式下不触发 abort, 可以打印多个 FATAL 堆栈
-        printf("%s", fatal_log.c_str());
-        log_appender_->Write(std::make_shared<LogMessage>(log_level, fatal_log));
-#endif
-      }
+      log_appender_->Write(std::make_shared<LogMessage>(log_level, buffer_));
+      //       if (log_level != Level::FATAL_LEVEL) {
+      //         log_appender_->Write(std::make_shared<LogMessage>(log_level, buffer_));
+      //       } else {
+      // #ifdef NDEBUG
+      //         std::string fatal_log = buffer_ + Backtrace();
+      //         // RELEASE 模式下不可重入, 防止打印多个 FATAL 日志
+      //         if (!receive_fatal_.exchange(true)) {
+      //           printf("%s", fatal_log.c_str());
+      //           log_appender_->Write(std::make_shared<LogMessage>(log_level, fatal_log));
+      //         }
+      // #else
+      //         // DEBUG 模式下不触发 abort, 可以打印多个 FATAL 堆栈
+      //         printf("%s", fatal_log.c_str());
+      //         log_appender_->Write(std::make_shared<LogMessage>(log_level, fatal_log));
+      // #endif
+      //       }
     }
     va_end(args);
   }
