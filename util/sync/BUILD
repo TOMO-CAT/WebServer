@@ -1,0 +1,20 @@
+cc_library(
+    name='thread_safe_queue',
+    hdrs=[
+        'thread_safe_queue.hpp',
+    ],
+    srcs=[],
+    deps=[
+    ],
+    visibility=['PUBLIC'],
+)
+
+cc_test(
+    name='thread_safe_queue_test',
+    srcs=[
+        'thread_safe_queue_test.cc',
+    ],
+    deps=[
+        ':thread_safe_queue',
+    ],
+)

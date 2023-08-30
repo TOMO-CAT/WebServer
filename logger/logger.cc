@@ -16,6 +16,7 @@
 #include <vector>
 
 #include "cpptoml/cpptoml.h"
+#include "logger/async_file_appender.h"
 #include "logger/backtrace.h"
 #include "logger/log.h"
 #include "logger/log_appender.h"
@@ -89,6 +90,7 @@ Logger::Logger() : is_console_output_(true) {
 }
 
 Logger::~Logger() {
+  std::cout << "退出日志" << std::endl;
   if (log_appender_) {
     log_appender_->Shutdown();
   }
@@ -129,12 +131,14 @@ bool Logger::Init(const std::string& conf_path) {
   }
 
   // 构造 log_appender_ 进行日志落盘
-  log_appender_ = std::make_unique<SyncFileAppender>(dir, file_name, retain_hours, true);
+  // log_appender_ = std::make_unique<SyncFileAppender>(dir, file_name, retain_hours, true);
+  // 测试异步日志
+  log_appender_ = std::make_unique<AsyncFileAppender>(dir, file_name, retain_hours, is_async);
   if (!log_appender_->Init()) {
     return false;
   }
 
-  // 默认不打印到控制台
+  // 默认不打印到控制台, 只会打印 error 和 fatal 的日志
   is_console_output_ = false;
 
   return true;
@@ -145,9 +149,19 @@ void Logger::Log(Level log_level, const char* fmt, ...) {
     return;
   }
 
+  if (!is_running_) {
+    return;
+  }
+
   std::string new_fmt = GenLogPrefix() + kLevel2Description.at(log_level) + fmt;
   // FATAL 日志需要打印堆栈
   if (log_level == Level::FATAL_LEVEL) {
+    // 防止打印多个 FATAL 日志, 第一次收到 FATAL 日志后就不再接受日志
+    if (receive_fatal_.exchange(true)) {
+      is_running_ = false;
+      return;
+    }
+
     new_fmt += "\n\tExiting due to FATAL log";
     new_fmt += "\n\tCall Stack:";
     new_fmt += "\n" + Backtrace();
@@ -183,58 +197,12 @@ void Logger::Log(Level log_level, const char* fmt, ...) {
 #if defined(__has_warning)
 #pragma clang diagnostic pop
 #endif
+
       log_appender_->Write(std::make_shared<LogMessage>(log_level, buffer_));
-      //       if (log_level != Level::FATAL_LEVEL) {
-      //         log_appender_->Write(std::make_shared<LogMessage>(log_level, buffer_));
-      //       } else {
-      // #ifdef NDEBUG
-      //         std::string fatal_log = buffer_ + Backtrace();
-      //         // RELEASE 模式下不可重入, 防止打印多个 FATAL 日志
-      //         if (!receive_fatal_.exchange(true)) {
-      //           printf("%s", fatal_log.c_str());
-      //           log_appender_->Write(std::make_shared<LogMessage>(log_level, fatal_log));
-      //         }
-      // #else
-      //         // DEBUG 模式下不触发 abort, 可以打印多个 FATAL 堆栈
-      //         printf("%s", fatal_log.c_str());
-      //         log_appender_->Write(std::make_shared<LogMessage>(log_level, fatal_log));
-      // #endif
-      //       }
     }
     va_end(args);
   }
-
-  //   // TODO(cat): 需要把 FATAL 日志退出的逻辑延后, 否则异步日志不会打全就直接退出了
-
-  //   if (log_level == Level::FATAL_LEVEL) {
-  // #ifdef NDEBUG
-  //     // RELEASE 模式下不可重入, 防止打印多个 FATAL 日志
-  //     if (!receive_fatal_.exchange(true)) {
-  //       Backtrace();
-  //     }
-  // #else
-  //     // DEBUG 模式下不触发 abort, 可以打印多个 FATAL 堆栈
-  //     Backtrace();
-  // #endif
-  //   }
 }
-
-// void Logger::Backtrace(const uint32_t skip_frames) {
-//   std::vector<std::string> stack_frames;
-//   if (!StackDumper(kSkipFrames).Dump(&stack_frames)) {
-//     printf("\t\tdump backtrace fail");
-//     return;
-//   }
-
-//   std::ostringstream output;
-//   for (auto&& sf : stack_frames) {
-//     output << "\t\t" << sf << '\n';
-//   }
-//   printf("%s", output.str().c_str());
-//   if (log_appender_) {
-//     log_appender_->Write(std::make_shared<LogMessage>(Level::ERROR_LEVEL, output.str()));
-//   }
-// }
 
 std::string Logger::GenLogPrefix() {
   struct timeval now;

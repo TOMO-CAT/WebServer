@@ -7,6 +7,7 @@ cc_library(
         'logger.cc',
         'backtrace.cc',
         'sync_file_appender.cc',
+        'async_file_appender.cc',
     ],
     hdrs=[
         'file_appender.h',
@@ -16,6 +17,7 @@ cc_library(
         'logger.h',
         'backtrace.h',
         'sync_file_appender.h',
+        'async_file_appender.h',
     ],
     deps=[
         '//util/toml:toml',

@@ -27,7 +27,8 @@ class AsyncFileAppender final : public FileAppender {
    * @param is_cut 是否切割日志
    */
   AsyncFileAppender(std::string dir, std::string file_name, int retain_hours, bool is_cut);
-  virtual ~AsyncFileAppender();
+  virtual ~AsyncFileAppender() {
+  }
 
  public:
   bool Init() override;

@@ -57,7 +57,17 @@ class ThreadSafeQueue {
     }
     return true;
   }
-  void Clear();
+  void Clear() {
+    std::unique_lock<std::shared_mutex> lk(rw_lock_);
+    while (!queue_.empty()) {
+      queue_.pop_front();
+    }
+  }
+
+  std::size_t Size() const {
+    std::shared_lock<std::shared_mutex> lk(rw_lock_);
+    return queue_.size();
+  }
 
  private:
   std::list<T> queue_;

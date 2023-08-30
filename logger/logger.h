@@ -46,6 +46,7 @@ class Logger {
   std::unique_ptr<LogAppender> log_appender_ = nullptr;
   Level priority_ = Level::DEBUG_LEVEL;
   std::atomic<bool> receive_fatal_ = {false};
+  std::atomic<bool> is_running_ = {true};
 
  private:
   static constexpr uint32_t kBufferSize = 4096;
