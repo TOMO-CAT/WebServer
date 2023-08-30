@@ -13,7 +13,7 @@ gen_rule(
 cc_binary(
     name='logger_test',
     srcs=[
-        'logger_test.cpp',
+        'logger_test.cc',
     ],
     deps=[
         '//logger:logger',
@@ -34,4 +34,11 @@ cc_binary(
     deps=[
         '//logger:logger',
     ]
+)
+
+cc_binary(
+    name='funny_test',
+    srcs=[
+        'funny_test.cc',
+    ],
 )

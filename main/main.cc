@@ -19,7 +19,23 @@ class MySingleton {
   }
 };
 
+class Cat {
+ public:
+  Cat() {
+    std::cout << "Cat构造函数" << std::endl;
+  }
+  ~Cat() {
+    std::cout << "Cat析构函数" << std::endl;
+  }
+
+ public:
+  void eat() {
+    std::cout << "Cat is eating" << std::endl;
+  }
+};
+
 int main() {
-  MySingleton::getInstance().printMessage();  // 使用单例对象
+  Cat* cat = new Cat();
+  cat->eat();
   return 0;
 }
