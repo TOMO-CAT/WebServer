@@ -1,6 +1,7 @@
 #pragma once
 
 #include <atomic>
+#include <iostream>
 #include <memory>
 #include <string>
 
@@ -18,8 +19,9 @@ class Logger {
   /**
    * 获取单例
    */
-  static Logger* Instance() {
-    return instance_;
+  static Logger& Instance() {
+    static Logger instance;
+    return instance;
   }
   /**
    * 根据日志级别打印日志
@@ -32,16 +34,16 @@ class Logger {
 
  private:
   Logger();
-  ~Logger();
+  ~Logger() {
+    if (log_appender_) {
+      log_appender_->Shutdown();
+    }
+  }
 
  private:
   static std::string GenLogPrefix();
 
-  //  private:
-  //   void Backtrace(const uint32_t skip_frames = 1);
-
  private:
-  static Logger* instance_;
   bool is_console_output_ = true;
   std::unique_ptr<LogAppender> log_appender_ = nullptr;
   Level priority_ = Level::DEBUG_LEVEL;

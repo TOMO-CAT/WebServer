@@ -19,8 +19,6 @@ AsyncFileAppender::AsyncFileAppender(std::string dir, std::string file_name, int
     : FileAppender(dir, file_name, retain_hours, is_cut) {
   message_queue_ = std::make_unique<::util::sync::ThreadSafeQueue<std::shared_ptr<LogMessage>>>(0);
 
-  std::cout << "[DEBUG] 构造异步日志" << std::endl;
-
   thread_ = std::thread([this]() {
     ::pthread_setname_np(::pthread_self(), "ASYNC_LOG_APPENDER");
 
@@ -63,13 +61,17 @@ AsyncFileAppender::AsyncFileAppender(std::string dir, std::string file_name, int
 }
 
 bool AsyncFileAppender::Init() {
-  std::cout << "[DEBUG] 异步日志初始化成功" << std::endl;
   return true;
 }
 
 void AsyncFileAppender::Shutdown() {
-  std::cout << "[DEBUG] 异步日志退出" << std::endl;
-  is_running_.store(false);
+  if (!is_running_.exchange(false)) {
+    return;
+  }
+  {
+    std::unique_lock<std::mutex> lk(cv_mtx_);
+    cv_.notify_one();
+  }
   if (thread_.joinable()) {
     thread_.join();
   }
@@ -77,7 +79,6 @@ void AsyncFileAppender::Shutdown() {
 
 void AsyncFileAppender::Write(const std::shared_ptr<LogMessage>& log_message) {
   this->message_queue_->Enqueue(log_message);
-  std::cout << "[DEBUG] 异步日志长度 ";
 }
 
 }  // namespace logger

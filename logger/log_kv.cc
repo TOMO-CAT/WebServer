@@ -4,8 +4,8 @@
 
 namespace logger {
 
-LoggerKV::LoggerKV(const Level level, const std::string& file, const uint32_t line,
-                   const std::string& function, const std::string& prefix)
+LoggerKV::LoggerKV(const Level level, const std::string& file, const uint32_t line, const std::string& function,
+                   const std::string& prefix)
     : level_(level), file_(file), line_(line), function_(function) {
   sstream_ << prefix;
 }
@@ -28,8 +28,7 @@ LoggerKV& LoggerKV::LogKVFormat(const char* const format, ...) {
 }
 
 LoggerKV::~LoggerKV() {
-  Logger::Instance()->Log(level_, "[%s:%d][%s] %s", file_.c_str(), line_, function_.c_str(),
-                          sstream_.str().c_str());
+  Logger::Instance().Log(level_, "[%s:%d][%s] %s", file_.c_str(), line_, function_.c_str(), sstream_.str().c_str());
 }
 
 }  // namespace logger

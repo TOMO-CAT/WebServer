@@ -28,6 +28,7 @@ class AsyncFileAppender final : public FileAppender {
    */
   AsyncFileAppender(std::string dir, std::string file_name, int retain_hours, bool is_cut);
   virtual ~AsyncFileAppender() {
+    Shutdown();
   }
 
  public:

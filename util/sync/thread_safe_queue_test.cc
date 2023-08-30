@@ -15,6 +15,7 @@ TEST(ThreadSafeQueue, usage_test) {
     std::list<int32_t> elem_list;
 
     while (is_running) {
+      std::cout << "[reader] current queue size is " << queue->Size() << std::endl;
       if (!queue->ExtractAll(&elem_list) || elem_list.empty()) {
         std::cout << "[reader] queue is empty" << std::endl;
       } else {

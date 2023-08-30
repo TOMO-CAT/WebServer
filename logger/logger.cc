@@ -59,8 +59,8 @@ const std::unordered_map<Level, std::string> kLevel2Description = {
 void HandleSignal() {
   auto handler = [](int signal) {
     printf("receive signal: %d\n", signal);
-    Logger::Instance()->Log(Level::FATAL_LEVEL, "Exiting due to receive signal: %d", signal);
-    exit(0);
+    Logger::Instance().Log(Level::FATAL_LEVEL, "Exiting due to receive signal: %d", signal);
+    ::exit(1);
   };
 
   signal(SIGHUP, SIG_IGN);
@@ -83,17 +83,10 @@ void HandleSignal() {
 thread_local int t_pid = ::getpid();
 thread_local uint64_t t_trace_id = 0;
 
-Logger* Logger::instance_ = new Logger();
+// Logger* Logger::instance_ = new Logger();
 
 Logger::Logger() : is_console_output_(true) {
   HandleSignal();
-}
-
-Logger::~Logger() {
-  std::cout << "退出日志" << std::endl;
-  if (log_appender_) {
-    log_appender_->Shutdown();
-  }
 }
 
 bool Logger::Init(const std::string& conf_path) {

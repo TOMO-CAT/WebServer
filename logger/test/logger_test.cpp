@@ -1,4 +1,6 @@
+#include <chrono>
 #include <filesystem>
+#include <thread>
 
 #include "logger/log.h"
 
@@ -14,7 +16,7 @@ struct Foo {
 int main() {
   std::string path = std::filesystem::path(__FILE__).parent_path().string();
 
-  if (!logger::Logger::Instance()->Init(path + "/conf/logger.conf")) {
+  if (!logger::Logger::Instance().Init(path + "/conf/logger.conf")) {
     LogError("init logger fail, print to console");
   }
 
