@@ -3,9 +3,11 @@ cc_library(
     hdrs=[
         'thread_safe_queue.hpp',
         'rcu_ptr.hpp',
+        'cow_ptr.hpp',
     ],
     srcs=[],
     deps=[
+        '//logger:logger',
     ],
     visibility=['PUBLIC'],
 )
@@ -24,6 +26,19 @@ cc_test(
     name='rcu_ptr_test',
     srcs=[
         'rcu_ptr_test.cc',
+    ],
+    deps=[
+        ':sync',
+        '//util/time:time',
+        '//logger:logger',
+        '//util:util',
+    ],
+)
+
+cc_test(
+    name='cow_ptr_test',
+    srcs=[
+        'cow_ptr_test.cc',
     ],
     deps=[
         ':sync',

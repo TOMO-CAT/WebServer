@@ -12,11 +12,13 @@ class rcu_ptr {
  public:
   rcu_ptr() = default;
   ~rcu_ptr() = default;
+  explicit rcu_ptr(const std::shared_ptr<const T>& sp) : sp_(sp) {
+  }
+
+ public:
   rcu_ptr(const rcu_ptr& rhs) = delete;
   rcu_ptr& operator=(const rcu_ptr& rhs) = delete;
   rcu_ptr(rcu_ptr&&) = delete;
-  explicit rcu_ptr(const std::shared_ptr<const T>& sp) : sp_(sp) {
-  }
 
  public:
   /**
@@ -46,7 +48,7 @@ class rcu_ptr {
   /**
    * @brief 接收一个 Lambda 表达式用于 update 数据, 如果有并发写, 它会被一直调用直到数据被 update
    *
-   * @tparam F 是一个接收 T* 的 Lambda 表达式, 其中 T 是原始数据深拷贝对象的指针
+   * @tparam F 是一个接收 T* 的 Lambda 表达式, 其中 T* 是原始数据深拷贝对象的指针
    * @param func
    */
   template <typename F>
