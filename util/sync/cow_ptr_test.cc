@@ -68,27 +68,27 @@ TEST(RcpPtrTest, rcu_ptr_test) {
     }));
   }
 
-  //   // 构造 reset 线程
-  //   for (int i = 0; i < RESET_THREAD_COUNT; i++) {
-  //     threads.push_back(std::thread([&]() {
-  //       uint64_t t_start_ns;
-  //       while (1) {
-  //         std::shared_ptr<std::vector<int>> new_data_sp = std::make_shared<std::vector<int>>();
-  //         new_data_sp->reserve(100);
-  //         for (int i = 0; i < 300; i++) {
-  //           new_data_sp->push_back(util::RandInt(10000));
-  //         }
-  //         t_start_ns = util::time::TimestampNanoSec();
-  //         cp.Reset(std::move(*new_data_sp));
-  //         LOG_INFO_EVERY(RESET_THREAD_COUNT * RESET_QPS)
-  //             << "[reset writer] cost [" << util::time::TimestampNanoSec() - t_start_ns << "] ns";
-  //         std::this_thread::sleep_for(std::chrono::milliseconds(1000 / RESET_QPS * RESET_THREAD_COUNT));
-  //         if (t_start_ns - g_start_ns > RUN_DURATION_SECONDS * 1000000000) {
-  //           return;
-  //         }
-  //       }
-  //     }));
-  //   }
+  // 构造 reset 线程
+  for (int i = 0; i < RESET_THREAD_COUNT; i++) {
+    threads.push_back(std::thread([&]() {
+      uint64_t t_start_ns;
+      while (1) {
+        std::shared_ptr<std::vector<int>> new_data_sp = std::make_shared<std::vector<int>>();
+        new_data_sp->reserve(100);
+        for (int i = 0; i < 300; i++) {
+          new_data_sp->push_back(util::RandInt(10000));
+        }
+        t_start_ns = util::time::TimestampNanoSec();
+        cp.Reset(std::move(*new_data_sp));
+        LOG_INFO_EVERY(RESET_THREAD_COUNT * RESET_QPS)
+            << "[reset writer] cost [" << util::time::TimestampNanoSec() - t_start_ns << "] ns";
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000 / RESET_QPS * RESET_THREAD_COUNT));
+        if (t_start_ns - g_start_ns > RUN_DURATION_SECONDS * 1000000000) {
+          return;
+        }
+      }
+    }));
+  }
 
   for (auto&& thread : threads) {
     thread.join();
