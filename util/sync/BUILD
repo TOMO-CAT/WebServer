@@ -1,7 +1,8 @@
 cc_library(
-    name='thread_safe_queue',
+    name='sync',
     hdrs=[
         'thread_safe_queue.hpp',
+        'rcu_ptr.hpp',
     ],
     srcs=[],
     deps=[
@@ -15,6 +16,19 @@ cc_test(
         'thread_safe_queue_test.cc',
     ],
     deps=[
-        ':thread_safe_queue',
+        ':sync',
+    ],
+)
+
+cc_test(
+    name='rcu_ptr_test',
+    srcs=[
+        'rcu_ptr_test.cc',
+    ],
+    deps=[
+        ':sync',
+        '//util/time:time',
+        '//logger:logger',
+        '//util:util',
     ],
 )
