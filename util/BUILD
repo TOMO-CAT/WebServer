@@ -1,8 +1,24 @@
 cc_library(
     name='util',
-    srcs=[],
+    srcs=[
+        'threadpool.cc',
+    ],
     hdrs=[
         'random.h',
+        'threadpool.h',
+    ],
+    deps=[
+        '//logger:logger',
     ],
     visibility=['PUBLIC'],
+)
+
+cc_test(
+    name='threadpool_test',
+    srcs=[
+        'threadpool_test.cc',
+    ],
+    deps=[
+        ':util',
+    ],
 )
