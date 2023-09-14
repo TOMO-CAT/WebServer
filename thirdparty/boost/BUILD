@@ -1,0 +1,10 @@
+cc_library(
+    name='boost',
+    export_incs=['./include'],
+    hdrs=[
+        'include/boost/preprocessor/stringize.hpp',
+        'include/boost/preprocessor/seq/for_each.hpp',
+        'include/boost/preprocessor.hpp',
+    ],
+    visibility=['PUBLIC'],
+)

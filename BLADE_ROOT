@@ -6,6 +6,7 @@ cc_config(
     extra_incs=[
         'thirdparty/cpptoml/include',
         'thirdparty/gtest/include',
-        '/usr/lib/gcc/x86_64-linux-gnu/11/include',
+        'thirdparty/boost/include',
+        # '/usr/lib/gcc/x86_64-linux-gnu/11/include',
     ],
 )
