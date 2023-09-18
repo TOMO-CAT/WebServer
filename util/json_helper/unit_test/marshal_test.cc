@@ -6,6 +6,7 @@
 
 #include "gtest/gtest.h"
 
+namespace util {
 namespace json_helper {
 
 TEST(MarshalTest, marshal_basic_types) {
@@ -19,28 +20,28 @@ TEST(MarshalTest, marshal_basic_types) {
   std::string str = "kkkk";
 
   Json::Value root;
-  ASSERT_TRUE(::json_helper::Marshal(i32, &root));
+  ASSERT_TRUE(::util::json_helper::Marshal(i32, &root));
   ASSERT_EQ(-123, root.asInt());
 
-  ASSERT_TRUE(::json_helper::Marshal(i64, &root));
+  ASSERT_TRUE(::util::json_helper::Marshal(i64, &root));
   ASSERT_EQ(-32123, root.asInt64());
 
-  ASSERT_TRUE(::json_helper::Marshal(ui32, &root));
+  ASSERT_TRUE(::util::json_helper::Marshal(ui32, &root));
   ASSERT_EQ(777u, root.asUInt());
 
-  ASSERT_TRUE(::json_helper::Marshal(ui64, &root));
+  ASSERT_TRUE(::util::json_helper::Marshal(ui64, &root));
   ASSERT_EQ(888u, root.asUInt64());
 
-  ASSERT_TRUE(::json_helper::Marshal(fl, &root));
+  ASSERT_TRUE(::util::json_helper::Marshal(fl, &root));
   ASSERT_FLOAT_EQ(3.14, root.asFloat());
 
-  ASSERT_TRUE(::json_helper::Marshal(db, &root));
+  ASSERT_TRUE(::util::json_helper::Marshal(db, &root));
   ASSERT_DOUBLE_EQ(-7.12, root.asDouble());
 
-  ASSERT_TRUE(::json_helper::Marshal(bl, &root));
+  ASSERT_TRUE(::util::json_helper::Marshal(bl, &root));
   ASSERT_TRUE(root.asBool());
 
-  ASSERT_TRUE(::json_helper::Marshal(str, &root));
+  ASSERT_TRUE(::util::json_helper::Marshal(str, &root));
   ASSERT_EQ("kkkk", root.asString());
 }
 
@@ -48,7 +49,7 @@ TEST(MarshalTest, marshal_vector) {
   std::vector<int32_t> vi = {1, 22, 333, 4444};
   Json::Value root;
 
-  ASSERT_TRUE(::json_helper::Marshal(vi, &root));
+  ASSERT_TRUE(::util::json_helper::Marshal(vi, &root));
   ASSERT_EQ(vi.size(), root.size());
   for (int i = 0; i < static_cast<int>(vi.size()); ++i) {
     EXPECT_EQ(vi[i], root[i].asInt());
@@ -63,7 +64,7 @@ TEST(MarshalTest, marshal_map) {
       {"ccc", -5},
       {"mmm", -100},
   };
-  ASSERT_TRUE(::json_helper::Marshal(m_str_i32, &root));
+  ASSERT_TRUE(::util::json_helper::Marshal(m_str_i32, &root));
   ASSERT_EQ(m_str_i32.size(), root.size());
   EXPECT_EQ(m_str_i32["kkk"], root["kkk"].asInt());
   EXPECT_EQ(m_str_i32["ccc"], root["ccc"].asInt());
@@ -75,7 +76,7 @@ TEST(MarshalTest, marshal_map) {
       {222, "22"},
       {333, "333"},
   };
-  ASSERT_TRUE(::json_helper::Marshal(m_ui64_str, &root));
+  ASSERT_TRUE(::util::json_helper::Marshal(m_ui64_str, &root));
   ASSERT_EQ(m_ui64_str.size(), root.size());
   EXPECT_EQ(m_ui64_str[111], root["111"].asString());
   EXPECT_EQ(m_ui64_str[222], root["222"].asString());
@@ -91,7 +92,7 @@ TEST(MarshalTest, marshal_unordered_map) {
       {"ccc", -5},
       {"mmm", -100},
   };
-  ASSERT_TRUE(::json_helper::Marshal(m_str_i32, &root));
+  ASSERT_TRUE(::util::json_helper::Marshal(m_str_i32, &root));
   ASSERT_EQ(m_str_i32.size(), root.size());
   EXPECT_EQ(m_str_i32["kkk"], root["kkk"].asInt());
   EXPECT_EQ(m_str_i32["ccc"], root["ccc"].asInt());
@@ -103,7 +104,7 @@ TEST(MarshalTest, marshal_unordered_map) {
       {222, "22"},
       {333, "333"},
   };
-  ASSERT_TRUE(::json_helper::Marshal(m_ui64_str, &root));
+  ASSERT_TRUE(::util::json_helper::Marshal(m_ui64_str, &root));
   ASSERT_EQ(m_ui64_str.size(), root.size());
   EXPECT_EQ(m_ui64_str[111], root["111"].asString());
   EXPECT_EQ(m_ui64_str[222], root["222"].asString());
@@ -114,7 +115,7 @@ TEST(MarshalTest, marshal_unordered_map) {
 TEST(MarshalTest, marshal_set_int32) {
   Json::Value root;
   std::set<int32_t> s = {1, -5, 20, 100, 7};
-  ASSERT_TRUE(::json_helper::Marshal(s, &root));
+  ASSERT_TRUE(::util::json_helper::Marshal(s, &root));
 
   ASSERT_EQ(s.size(), root.size());
   EXPECT_EQ(-5, root[0].asInt());
@@ -127,7 +128,7 @@ TEST(MarshalTest, marshal_set_int32) {
 TEST(MarshalTest, marshal_unordered_set_string) {
   Json::Value root;
   std::unordered_set<std::string> us = {"111", "aaa", "to"};
-  ASSERT_TRUE(::json_helper::Marshal(us, &root));
+  ASSERT_TRUE(::util::json_helper::Marshal(us, &root));
 
   ASSERT_EQ(us.size(), root.size());
 
@@ -200,11 +201,11 @@ TEST(MarshalTest, marshal_uncaught_types) {
     std::string name;
   };
   Dog dog;
-  ASSERT_FALSE(::json_helper::Marshal(dog, &root));
+  ASSERT_FALSE(::util::json_helper::Marshal(dog, &root));
 
   // 2. std::mutex
   std::mutex mutex;
-  ASSERT_FALSE(::json_helper::Marshal(mutex, &root));
+  ASSERT_FALSE(::util::json_helper::Marshal(mutex, &root));
 }
 
 TEST(MarshalTest, marshal_enum_class) {
@@ -219,7 +220,7 @@ TEST(MarshalTest, marshal_enum_class) {
 
   for (int i = 0; i < 4; ++i) {
     Color color = static_cast<Color>(i);
-    ASSERT_TRUE(::json_helper::Marshal(color, &root));
+    ASSERT_TRUE(::util::json_helper::Marshal(color, &root));
     EXPECT_EQ(i, root.asInt());
   }
 }
@@ -257,15 +258,16 @@ TEST(MarshalTest, marshal_pointer) {
 
   {
     int* pi = nullptr;
-    ASSERT_TRUE(::json_helper::Marshal(pi, &root));
+    ASSERT_TRUE(::util::json_helper::Marshal(pi, &root));
     EXPECT_EQ("nullptr", root.asString());
   }
   {
     int i = 10;
     int* pi = &i;
-    ASSERT_TRUE(::json_helper::Marshal(pi, &root));
+    ASSERT_TRUE(::util::json_helper::Marshal(pi, &root));
     EXPECT_EQ(10, root.asInt());
   }
 }
 
 }  // namespace json_helper
+}  // namespace util

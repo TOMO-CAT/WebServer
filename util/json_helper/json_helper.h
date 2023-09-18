@@ -6,6 +6,7 @@
 #include "util/json_helper/marshal.h"
 #include "util/json_helper/unmarshal.h"
 
+namespace util {
 namespace json_helper {
 
 template <typename T>
@@ -74,3 +75,4 @@ std::string ToStringFormatted(const T& obj) {
   JSON_HELPER_UNMARSHAL_MEMBER_FUNCTION(__VA_ARGS__) JSON_HELPER_MARSHAL_MEMBER_FUNCTION(__VA_ARGS__)
 
 }  // namespace json_helper
+}  // namespace util

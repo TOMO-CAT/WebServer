@@ -10,3 +10,8 @@ cc_config(
         # '/usr/lib/gcc/x86_64-linux-gnu/11/include',
     ],
 )
+
+global_config(
+    # 运行每个测试的超时时间 (单位秒)
+    test_timeout = 60,
+)

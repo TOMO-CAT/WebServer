@@ -2,6 +2,7 @@
 
 #include <type_traits>
 
+namespace util {
 namespace json_helper {
 
 #ifndef _JSON_HELPER_DEBUG
@@ -23,3 +24,4 @@ template <typename T>
 struct HasMarshalFunc<T, std::void_t<decltype(&T::Marshal)>> : std::true_type {};
 
 }  // namespace json_helper
+}  // namespace util

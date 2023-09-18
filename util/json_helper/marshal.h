@@ -15,6 +15,7 @@
 #include "json/json.h"
 #include "util/json_helper/common.h"
 
+namespace util {
 namespace json_helper {
 
 // return false for uncaught types
@@ -68,9 +69,9 @@ bool Marshal(const std::set<T>& obj, Json::Value* const root);
 template <typename T>
 bool Marshal(const std::unordered_set<T>& obj, Json::Value* const root);
 
-#define __JSON_HELPER_MARSHAL_SINGLE_FIELD__(_1, _2, field)                    \
-  if (!::json_helper::Marshal(field, &((*root)[BOOST_PP_STRINGIZE(field)]))) { \
-    ret = false;                                                               \
+#define __JSON_HELPER_MARSHAL_SINGLE_FIELD__(_1, _2, field)                          \
+  if (!::util::json_helper::Marshal(field, &((*root)[BOOST_PP_STRINGIZE(field)]))) { \
+    ret = false;                                                                     \
   }
 
 #define JSON_HELPER_MARSHAL_MEMBER_FUNCTION(...)                                                           \
@@ -253,3 +254,4 @@ bool Marshal(const std::unordered_set<T>& obj, Json::Value* const root) {
 }
 
 }  // namespace json_helper
+}  // namespace util

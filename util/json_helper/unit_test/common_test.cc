@@ -3,6 +3,7 @@
 #include "gtest/gtest.h"
 #include "util/json_helper/json_helper.h"
 
+namespace util {
 namespace json_helper {
 
 // HasUnmarshalFunc<T> 模板类用于辅助判断类 T 是否定义了 Unmarshal 方法
@@ -12,10 +13,10 @@ TEST(CommonTest, test_HasUnmarshalFunc) {
       return true;
     }
   };
-  EXPECT_TRUE(::json_helper::HasUnmarshalFunc<Class_WithUnmarshalMemberFunction>::value);
+  EXPECT_TRUE(::util::json_helper::HasUnmarshalFunc<Class_WithUnmarshalMemberFunction>::value);
 
   struct Class_WithoutUnmarshalMemberFunction {};
-  EXPECT_FALSE(::json_helper::HasUnmarshalFunc<Class_WithoutUnmarshalMemberFunction>::value);
+  EXPECT_FALSE(::util::json_helper::HasUnmarshalFunc<Class_WithoutUnmarshalMemberFunction>::value);
 
   struct Cat_WithUnmarshalMacro {
     std::string name;
@@ -24,7 +25,7 @@ TEST(CommonTest, test_HasUnmarshalFunc) {
 
     JSON_HELPER_UNMARSHAL_MEMBER_FUNCTION(name, age, birthday);
   };
-  EXPECT_TRUE(::json_helper::HasUnmarshalFunc<Cat_WithUnmarshalMacro>::value);
+  EXPECT_TRUE(::util::json_helper::HasUnmarshalFunc<Cat_WithUnmarshalMacro>::value);
 }
 
 // HasMarshalFunc<T> 模板类用于辅助判断类 T 是否定义了 Marshal 方法
@@ -35,10 +36,10 @@ TEST(CommonTest, test_HasMarshalFunc) {
     }
   };
 
-  EXPECT_TRUE(::json_helper::HasMarshalFunc<Class_WithMarshalMemberFunction>::value);
+  EXPECT_TRUE(::util::json_helper::HasMarshalFunc<Class_WithMarshalMemberFunction>::value);
 
   struct Class_WithoutMarshalMemberFunction {};
-  EXPECT_FALSE(::json_helper::HasMarshalFunc<Class_WithoutMarshalMemberFunction>::value);
+  EXPECT_FALSE(::util::json_helper::HasMarshalFunc<Class_WithoutMarshalMemberFunction>::value);
 
   struct Cat_WithMarshalMacro {
     std::string name;
@@ -47,7 +48,7 @@ TEST(CommonTest, test_HasMarshalFunc) {
 
     JSON_HELPER_MARSHAL_MEMBER_FUNCTION(name, age, birthday);
   };
-  EXPECT_TRUE(::json_helper::HasMarshalFunc<Cat_WithMarshalMacro>::value);
+  EXPECT_TRUE(::util::json_helper::HasMarshalFunc<Cat_WithMarshalMacro>::value);
 }
 
 // std::is_enum<T> 模版类用于判断类 T 是否是 enum
@@ -68,3 +69,4 @@ TEST(CommonTest, test_std_is_enum) {
 }
 
 }  // namespace json_helper
+}  // namespace util

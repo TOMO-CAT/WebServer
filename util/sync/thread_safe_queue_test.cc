@@ -37,7 +37,7 @@ TEST(ThreadSafeQueue, usage_test) {
   std::thread reader_thread(reader, &queue);
   std::thread writer_thread1(writer, &queue);
   std::thread writer_thread2(writer, &queue);
-  std::this_thread::sleep_for(std::chrono::seconds(3));
+  std::this_thread::sleep_for(std::chrono::seconds(2));
   is_running = false;
   if (reader_thread.joinable()) {
     reader_thread.join();

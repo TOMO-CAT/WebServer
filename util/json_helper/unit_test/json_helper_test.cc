@@ -4,6 +4,7 @@
 
 #include "gtest/gtest.h"
 
+namespace util {
 namespace json_helper {
 
 TEST(JsonHelperTest, unmarshal_test_basic_type) {
@@ -15,19 +16,19 @@ TEST(JsonHelperTest, unmarshal_test_basic_type) {
   float fl = {};
   double db = {};
 
-  ASSERT_TRUE(::json_helper::Unmarshal("123", &i32));
+  ASSERT_TRUE(::util::json_helper::Unmarshal("123", &i32));
   EXPECT_EQ(123, i32);
-  ASSERT_TRUE(::json_helper::Unmarshal("321", &i64));
+  ASSERT_TRUE(::util::json_helper::Unmarshal("321", &i64));
   EXPECT_EQ(321, i64);
-  ASSERT_TRUE(::json_helper::Unmarshal("1111", &ui32));
+  ASSERT_TRUE(::util::json_helper::Unmarshal("1111", &ui32));
   EXPECT_EQ(1111u, ui32);
-  ASSERT_TRUE(::json_helper::Unmarshal("2222", &ui64));
+  ASSERT_TRUE(::util::json_helper::Unmarshal("2222", &ui64));
   EXPECT_EQ(2222u, ui64);
-  ASSERT_TRUE(::json_helper::Unmarshal(R"("kkkk")", &str));
+  ASSERT_TRUE(::util::json_helper::Unmarshal(R"("kkkk")", &str));
   EXPECT_EQ("kkkk", str);
-  ASSERT_TRUE(::json_helper::Unmarshal("3.14", &fl));
+  ASSERT_TRUE(::util::json_helper::Unmarshal("3.14", &fl));
   EXPECT_FLOAT_EQ(3.14, fl);
-  ASSERT_TRUE(::json_helper::Unmarshal("9.666", &db));
+  ASSERT_TRUE(::util::json_helper::Unmarshal("9.666", &db));
   EXPECT_DOUBLE_EQ(9.666, db);
 }
 
@@ -47,8 +48,9 @@ TEST(JsonHelperTest, to_string) {
 
     Cat cat;
     std::string expected_str = R"({"age":-10,"birthday":3.1000000000000001,"favorite_nums":[5,7,9],"name":"cc"})";
-    EXPECT_EQ(expected_str, ::json_helper::ToString(cat));
+    EXPECT_EQ(expected_str, ::util::json_helper::ToString(cat));
   }
 }
 
 }  // namespace json_helper
+}  // namespace util

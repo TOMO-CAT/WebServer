@@ -115,8 +115,8 @@ int main() {
   // 通过 json_helper 进行反序列化和序列化
   {
     std::cout << "===================== json_helper =====================" << std::endl;
-    CHECK(::json_helper::Unmarshal(json_str, &foo));
-    std::cout << ::json_helper::ToStringFormatted(foo) << std::endl;
+    CHECK(::util::json_helper::Unmarshal(json_str, &foo));
+    std::cout << ::util::json_helper::ToStringFormatted(foo) << std::endl;
     std::cout << "=======================================================" << std::endl;
 
     CHECK_EQ(24, foo.age);

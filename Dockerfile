@@ -25,4 +25,5 @@ RUN apt-get install -y --fix-missing \
     python3-pip \
     clangd \
     clang-format \
-    && pip install cpplint
+    && pip install cpplint \
+    && pip install gcovr

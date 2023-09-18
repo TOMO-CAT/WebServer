@@ -4,6 +4,7 @@
 
 #include "gtest/gtest.h"
 
+namespace util {
 namespace json_helper {
 
 // 反序列化基础类型
@@ -26,10 +27,10 @@ TEST(UnmarshalTest, unmarshal_basic_type) {
   float res_float = 0.0;
   double res_double = 0.0;
 
-  ASSERT_TRUE(::json_helper::Unmarshal(root["name"], &res_str));
-  ASSERT_TRUE(::json_helper::Unmarshal(root["age"], &res_int32_t));
-  ASSERT_TRUE(::json_helper::Unmarshal(root["birthday"], &res_float));
-  ASSERT_TRUE(::json_helper::Unmarshal(root["pi"], &res_double));
+  ASSERT_TRUE(::util::json_helper::Unmarshal(root["name"], &res_str));
+  ASSERT_TRUE(::util::json_helper::Unmarshal(root["age"], &res_int32_t));
+  ASSERT_TRUE(::util::json_helper::Unmarshal(root["birthday"], &res_float));
+  ASSERT_TRUE(::util::json_helper::Unmarshal(root["pi"], &res_double));
 
   EXPECT_EQ("tomo", res_str);
   EXPECT_EQ(12, res_int32_t);
@@ -67,7 +68,7 @@ TEST(UnmarshalTest, unmarshal_plain_class) {
 
   // 2. 使用重载的 Unmarshal 函数
   Cat cat2;
-  ASSERT_TRUE(::json_helper::Unmarshal(root, &cat2));
+  ASSERT_TRUE(::util::json_helper::Unmarshal(root, &cat2));
   EXPECT_EQ("tomo", cat2.name);
   EXPECT_EQ(12, cat2.age);
   EXPECT_DOUBLE_EQ(5.11, cat2.birthday);
@@ -92,13 +93,13 @@ TEST(UnmarshalTest, test_uncaught_types) {
   Json::Reader reader;
   ASSERT_TRUE(reader.parse(str, root));
   Dog dog;
-  ASSERT_FALSE(::json_helper::Unmarshal(root, &dog));
+  ASSERT_FALSE(::util::json_helper::Unmarshal(root, &dog));
   EXPECT_EQ("", dog.name);
   EXPECT_EQ(-1, dog.age);
 
   // 2. std::mutex
   std::mutex mtx;
-  ASSERT_FALSE(::json_helper::Unmarshal(root, &mtx));
+  ASSERT_FALSE(::util::json_helper::Unmarshal(root, &mtx));
 }
 
 // enum 类的 Unmarshal
@@ -124,7 +125,7 @@ TEST(UnmarshalTest, test_enum_class) {
 
   Color color;
   for (uint32_t i = 0; i < num2enum.size(); ++i) {
-    ::json_helper::Unmarshal(root[std::to_string(i)], &color);
+    ::util::json_helper::Unmarshal(root[std::to_string(i)], &color);
     EXPECT_EQ(num2enum[i], color);
   }
 }
@@ -164,7 +165,7 @@ TEST(UnmarshalTest, test_nested_class) {
   ASSERT_TRUE(reader.parse(str, root));
 
   Vehicle vehicle;
-  ASSERT_TRUE(::json_helper::Unmarshal(root, &vehicle));
+  ASSERT_TRUE(::util::json_helper::Unmarshal(root, &vehicle));
 
   EXPECT_EQ("blue", vehicle.color);
   EXPECT_EQ(45, vehicle.wheel.temp);
@@ -207,7 +208,7 @@ TEST(UnmarshalTest, test_class_without_unmarshal_member_function) {
   ASSERT_TRUE(reader.parse(str, root));
   ASSERT_TRUE(root.isObject());
 
-  ASSERT_TRUE(::json_helper::Unmarshal(root, &target));
+  ASSERT_TRUE(::util::json_helper::Unmarshal(root, &target));
 
   EXPECT_EQ("cat", target.name);
   EXPECT_EQ(10u, target.age);
@@ -225,7 +226,7 @@ TEST(UnmarshalTest, test_unmarshal_vector) {
   ASSERT_TRUE(root.isArray());
 
   std::vector<std::string> res;
-  ASSERT_TRUE(::json_helper::Unmarshal(root, &res));
+  ASSERT_TRUE(::util::json_helper::Unmarshal(root, &res));
 
   ASSERT_EQ(3u, res.size());
   EXPECT_EQ("a", res[0]);
@@ -248,7 +249,7 @@ TEST(UnmarshalTest, test_unmarshal_map_string_key) {
   ASSERT_TRUE(root.isObject());
 
   std::map<std::string, int32_t> res;
-  ASSERT_TRUE(::json_helper::Unmarshal(root, &res));
+  ASSERT_TRUE(::util::json_helper::Unmarshal(root, &res));
 
   ASSERT_EQ(3u, res.size());
   EXPECT_EQ(10, res["cat"]);
@@ -272,7 +273,7 @@ TEST(UnmarshalTest, test_unmarshal_map_int_key) {
 
   // int32_t
   std::map<int32_t, int32_t> int32_key_res;
-  ASSERT_TRUE(::json_helper::Unmarshal(root, &int32_key_res));
+  ASSERT_TRUE(::util::json_helper::Unmarshal(root, &int32_key_res));
 
   ASSERT_EQ(3u, int32_key_res.size());
   EXPECT_EQ(10, int32_key_res[1]);
@@ -281,7 +282,7 @@ TEST(UnmarshalTest, test_unmarshal_map_int_key) {
 
   // int64_t
   std::map<int64_t, int32_t> int64_key_res;
-  ASSERT_TRUE(::json_helper::Unmarshal(root, &int64_key_res));
+  ASSERT_TRUE(::util::json_helper::Unmarshal(root, &int64_key_res));
 
   ASSERT_EQ(3u, int64_key_res.size());
   EXPECT_EQ(10, int64_key_res[1]);
@@ -290,7 +291,7 @@ TEST(UnmarshalTest, test_unmarshal_map_int_key) {
 
   // uint32_t
   std::map<int64_t, int32_t> uint32_key_res;
-  ASSERT_TRUE(::json_helper::Unmarshal(root, &uint32_key_res));
+  ASSERT_TRUE(::util::json_helper::Unmarshal(root, &uint32_key_res));
 
   ASSERT_EQ(3u, uint32_key_res.size());
   EXPECT_EQ(10, uint32_key_res[1]);
@@ -299,7 +300,7 @@ TEST(UnmarshalTest, test_unmarshal_map_int_key) {
 
   // uint64_t
   std::map<int64_t, int32_t> uint64_key_res;
-  ASSERT_TRUE(::json_helper::Unmarshal(root, &uint64_key_res));
+  ASSERT_TRUE(::util::json_helper::Unmarshal(root, &uint64_key_res));
 
   ASSERT_EQ(3u, uint64_key_res.size());
   EXPECT_EQ(10, uint64_key_res[1]);
@@ -323,7 +324,7 @@ TEST(UnmarshalTest, test_unmarshal_unordered_map_int_key) {
 
   // int32_t
   std::unordered_map<int32_t, int32_t> int32_key_res;
-  ASSERT_TRUE(::json_helper::Unmarshal(root, &int32_key_res));
+  ASSERT_TRUE(::util::json_helper::Unmarshal(root, &int32_key_res));
 
   ASSERT_EQ(3u, int32_key_res.size());
   EXPECT_EQ(115, int32_key_res[1]);
@@ -332,7 +333,7 @@ TEST(UnmarshalTest, test_unmarshal_unordered_map_int_key) {
 
   // int64_t
   std::unordered_map<int64_t, int32_t> int64_key_res;
-  ASSERT_TRUE(::json_helper::Unmarshal(root, &int64_key_res));
+  ASSERT_TRUE(::util::json_helper::Unmarshal(root, &int64_key_res));
 
   ASSERT_EQ(3u, int64_key_res.size());
   EXPECT_EQ(115, int64_key_res[1]);
@@ -341,7 +342,7 @@ TEST(UnmarshalTest, test_unmarshal_unordered_map_int_key) {
 
   // uint32_t
   std::unordered_map<int64_t, int32_t> uint32_key_res;
-  ASSERT_TRUE(::json_helper::Unmarshal(root, &uint32_key_res));
+  ASSERT_TRUE(::util::json_helper::Unmarshal(root, &uint32_key_res));
 
   ASSERT_EQ(3u, uint32_key_res.size());
   EXPECT_EQ(115, uint32_key_res[1]);
@@ -350,7 +351,7 @@ TEST(UnmarshalTest, test_unmarshal_unordered_map_int_key) {
 
   // uint64_t
   std::unordered_map<int64_t, int32_t> uint64_key_res;
-  ASSERT_TRUE(::json_helper::Unmarshal(root, &uint64_key_res));
+  ASSERT_TRUE(::util::json_helper::Unmarshal(root, &uint64_key_res));
 
   ASSERT_EQ(3u, uint64_key_res.size());
   EXPECT_EQ(115, uint64_key_res[1]);
@@ -374,7 +375,7 @@ TEST(UnmarshalTest, test_unmarshal_set_and_unordered_set) {
 
   // set
   std::set<std::string> s;
-  ASSERT_TRUE(::json_helper::Unmarshal(root, &s));
+  ASSERT_TRUE(::util::json_helper::Unmarshal(root, &s));
   ASSERT_EQ(3u, s.size());
   EXPECT_EQ(1u, s.count("cat"));
   EXPECT_EQ(1u, s.count("dog"));
@@ -382,7 +383,7 @@ TEST(UnmarshalTest, test_unmarshal_set_and_unordered_set) {
 
   // unordered_set
   std::unordered_set<std::string> us;
-  ASSERT_TRUE(::json_helper::Unmarshal(root, &us));
+  ASSERT_TRUE(::util::json_helper::Unmarshal(root, &us));
   ASSERT_EQ(3u, us.size());
   EXPECT_EQ(1u, us.count("cat"));
   EXPECT_EQ(1u, us.count("dog"));
@@ -396,7 +397,7 @@ TEST(UnmarshalTest, unmarshal_pointer) {
   // 反序列化到普通的 int 类型
   {
     int i = 0;
-    ASSERT_TRUE(::json_helper::Unmarshal(root, &i));
+    ASSERT_TRUE(::util::json_helper::Unmarshal(root, &i));
     EXPECT_EQ(40, i);
   }
 
@@ -404,14 +405,14 @@ TEST(UnmarshalTest, unmarshal_pointer) {
   {
     int i = 0;
     int* pi = &i;
-    ASSERT_TRUE(::json_helper::Unmarshal(root, pi));
+    ASSERT_TRUE(::util::json_helper::Unmarshal(root, pi));
     EXPECT_EQ(40, i);
   }
 
   // 反序列化到 int 类型: nullptr
   {
     int* pi = nullptr;
-    EXPECT_DEATH(::json_helper::Unmarshal(root, pi), "");
+    EXPECT_DEATH(::util::json_helper::Unmarshal(root, pi), "");
     EXPECT_EQ(nullptr, pi);
   }
 
@@ -421,13 +422,13 @@ TEST(UnmarshalTest, unmarshal_pointer) {
     {
       int i = 0;
       int* pi = &i;
-      ASSERT_TRUE(::json_helper::Unmarshal(root, &pi));
+      ASSERT_TRUE(::util::json_helper::Unmarshal(root, &pi));
       EXPECT_EQ(40, i);
     }
     // nullptr
     {
       int* pi = nullptr;
-      EXPECT_TRUE(::json_helper::Unmarshal(root, &pi));
+      EXPECT_TRUE(::util::json_helper::Unmarshal(root, &pi));
     }
   }
 }
@@ -451,10 +452,11 @@ TEST(UnmarshalTest, unmarshal_constexpr) {
   Json::Reader reader;
   ASSERT_TRUE(reader.parse(str, root));
   ClassWithStaticConstexprVariable obj;
-  ASSERT_FALSE(::json_helper::Unmarshal(root, &obj));
+  ASSERT_FALSE(::util::json_helper::Unmarshal(root, &obj));
 
   // 依然能解析出来部分字段
   ASSERT_EQ("tomo", obj.name);
 }
 
 }  // namespace json_helper
+}  // namespace util

@@ -16,6 +16,7 @@
 #include "json/json.h"
 #include "util/json_helper/common.h"
 
+namespace util {
 namespace json_helper {
 
 // return false for uncaught types
@@ -85,13 +86,13 @@ bool Unmarshal(const Json::Value& root, std::unordered_set<T>* const obj);
 #ifndef NDEBUG
 #define __JSON_HELPER_UNMARSHAL_SINGLE_FIELD__(_1, _2, field)                                                        \
   std::cout << "[JsonHelper][Unmarshal][Debug] parse class field [" << BOOST_PP_STRINGIZE(field)<< "]" << std::endl; \
-  if (!::json_helper::Unmarshal(root[BOOST_PP_STRINGIZE(field)], &field)) {                                          \
+  if (!::util::json_helper::Unmarshal(root[BOOST_PP_STRINGIZE(field)], &field)) {                                    \
     ret = false;                                                                                                     \
   }
 #else
-#define __JSON_HELPER_UNMARSHAL_SINGLE_FIELD__(_1, _2, field)               \
-  if (!::json_helper::Unmarshal(root[BOOST_PP_STRINGIZE(field)], &field)) { \
-    ret = false;                                                            \
+#define __JSON_HELPER_UNMARSHAL_SINGLE_FIELD__(_1, _2, field)                     \
+  if (!::util::json_helper::Unmarshal(root[BOOST_PP_STRINGIZE(field)], &field)) { \
+    ret = false;                                                                  \
   }
 #endif
 
@@ -518,3 +519,4 @@ bool Unmarshal(const Json::Value& root, std::unordered_set<T>* const obj) {
 }
 
 }  // namespace json_helper
+}  // namespace util

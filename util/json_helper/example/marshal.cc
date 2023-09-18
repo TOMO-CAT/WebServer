@@ -75,12 +75,12 @@ class Foo {
 int main() {
   Foo foo;
   std::string json_str;
-  ::json_helper::Marshal(foo, &json_str, true);
+  ::util::json_helper::Marshal(foo, &json_str, true);
   std::cout << "============ with style ============" << std::endl;
   std::cout << json_str << std::endl;
 
   std::cout << "=========== without style ==========" << std::endl;
-  ::json_helper::Marshal(foo, &json_str);
+  ::util::json_helper::Marshal(foo, &json_str);
   std::cout << json_str << std::endl;
   return 0;
 }
