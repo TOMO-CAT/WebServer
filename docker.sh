@@ -127,8 +127,15 @@ function docker_build() {
 
   if [ "$(uname)" == "Darwin" ] ;then
     ## 1. macOS 暂不支持
-    error "No support macOs now!"
-    exit -1
+    docker run ${general_param} \
+        -p 9526:9526 \
+        -p 9981:9981 \
+        -p 9998:9998 \
+        --add-host ${DOCKER_HOSTNAME}:127.0.0.1 \
+        --add-host ${local_host}:127.0.0.1 \
+        --hostname ${DOCKER_HOSTNAME} \
+        ${DOCKER_IMAGE} \
+        /bin/bash
   else
     ## 2. Linux
     # ro 表示只读
@@ -165,7 +172,7 @@ function docker_build() {
     [ "$(uname)" == "Darwin" ] && {
       docker exec ${DOCKER_CONTAINER} bash -c "useradd $USER -m --home /home/$USER || echo $?"
       docker exec ${DOCKER_CONTAINER} bash -c "echo '$USER ALL=NOPASSWD: ALL' >> /etc/sudoers"
-      docker exec ${DOCKER_CONTAINER} bash -c "chown -R $USER"
+      docker exec ${DOCKER_CONTAINER} bash -c "chown -R $USER ${docker_home}"
     } || {
       docker exec -u root ${DOCKER_CONTAINER} bash -c "echo '$USER ALL=NOPASSWD: ALL' >> /etc/sudoers"
       # 由于 ~/.bashrc 等文件是只读的, 因此这里使用 `|| true``
@@ -176,8 +183,14 @@ function docker_build() {
 
   # 安装 blade
   info "Installing blade..."
-  docker exec --user $(id -u):$(id -g) ${DOCKER_CONTAINER} bash -c "git clone https://github.com/chen3feng/blade-build.git --branch v2.0 --single-branch --depth=1 ~/blade-build &&\
+  [ "$(uname)" == "Darwin" ] && {
+    docker exec -u $USER ${DOCKER_CONTAINER} bash -c "git clone https://github.com/chen3feng/blade-build.git --branch v2.0 --single-branch --depth=1 ~/blade-build &&\
     cd ~/blade-build && bash install && echo 'export PATH=~/bin:$PATH' >> ~/.bashrc && /bin/bash"
+  } || {
+    docker exec --user $(id -u):$(id -g) ${DOCKER_CONTAINER} bash -c "git clone https://github.com/chen3feng/blade-build.git --branch v2.0 --single-branch --depth=1 ~/blade-build &&\
+    cd ~/blade-build && bash install && echo 'export PATH=~/bin:$PATH' >> ~/.bashrc && /bin/bash"
+  }
+
 
   # 如果当前目录根目录存在 BLADE_ROOT 则以 USER 用户安装 blade
   # 目前都是自己手动安装: "cd thirdparty/blade-build/ && ./install && /bin/bash"
