@@ -19,4 +19,8 @@ test:
 coverage:
 	mkdir -p coverage_reports
 	gcovr -r . --html --html-details -o coverage_reports/coverage_report.html
+	
+# 单测覆盖率 server
+.PHONY: coverage-server
+coverage-server: coverage
 	cd coverage_reports && python3 -m http.server 8080
