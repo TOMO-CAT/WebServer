@@ -26,3 +26,8 @@
 
 ```bash
 ```
+
+## TODO
+
+1. ./lint.sh 默认格式化所有代码文件, 只通过 exclude 反向选择
+2. threadpool 避免饥饿死锁

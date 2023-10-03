@@ -7,6 +7,7 @@ cc_config(
         'thirdparty/cpptoml/include',
         'thirdparty/gtest/include',
         'thirdparty/boost/include',
+        'thirdparty/prometheus-cpp/include',
         # '/usr/lib/gcc/x86_64-linux-gnu/11/include',
     ],
 )

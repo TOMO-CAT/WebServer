@@ -1,0 +1,15 @@
+cc_library(
+    name='metrics',
+    hdrs=[
+        'metrics.h',
+        'exporter.hpp',
+    ],
+    srcs=[
+        'metrics.cc'
+    ],
+    deps=[
+        '//thirdparty/prometheus-cpp:prometheus-cpp',
+        '//util/sync:sync',
+    ],
+    visibility=['PUBLIC'],
+)
