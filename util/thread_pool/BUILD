@@ -1,0 +1,14 @@
+cc_library(
+    name='thread_pool',
+    srcs=[
+        'thread_pool.cc',
+    ],
+    hdrs=[
+        'thread_pool.h',
+        'level_thread_pool.h',
+    ],
+    deps=[
+        '//logger:logger',
+    ],
+    visibility=['PUBLIC'],
+)
