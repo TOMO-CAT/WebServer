@@ -7,3 +7,4 @@ compile_commands.json
 logs/
 build/
 coverage_reports/
+.xmake/

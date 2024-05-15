@@ -1,4 +1,4 @@
-#include "logger/backtrace.h"
+#include "logger/log_backtrace.h"
 
 #include <backtrace.h>
 #include <cxxabi.h>
@@ -52,10 +52,13 @@ bool StackDumper::Dump(std::vector<std::string>* const stack_frames) {
 }
 
 void StackDumper::ErrorCallback(void* data, const char* msg, int errnum) {
+  (void)data;
+  (void)errnum;
   std::cerr << msg << std::endl;
 }
 
 int StackDumper::BacktraceCallback(void* data, uintptr_t pc, const char* file, int line, const char* func) {
+  (void)pc;
   BacktraceContext* ptr_bc = reinterpret_cast<BacktraceContext*>(data);
   return ptr_bc->sd->Backtrace(file, line, func, &ptr_bc->frame_depth, ptr_bc->res);
 }

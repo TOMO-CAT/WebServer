@@ -17,9 +17,9 @@
 
 #include "cpptoml/cpptoml.h"
 #include "logger/async_file_appender.h"
-#include "logger/backtrace.h"
 #include "logger/log.h"
 #include "logger/log_appender.h"
+#include "logger/log_backtrace.h"
 #include "logger/log_level.h"
 #include "logger/log_message.h"
 #include "logger/sync_file_appender.h"
@@ -117,13 +117,13 @@ bool Logger::Init(const std::string& conf_path) {
     return false;
   }
   if (!::util::toml::ParseTomlValue(g, "RetainHours", &retain_hours)) {
-    retain_hours = 0;  // retain_hours 为 0 时不会删除过期日志
+    retain_hours = 0;  //retain_hours 为 0 时不会删除过期日志
   }
   if (!::util::toml::ParseTomlValue(g, "IsAsync", &is_async)) {
     is_async = false;
   }
 
-  // 构造 log_appender_ 进行日志落盘, 支持同步日志和异步日志两种方式
+  // 构造 log_appender_ 进行日志落盘，支持同步日志和异步日志两种方式
   if (is_async) {
     log_appender_ = std::make_unique<AsyncFileAppender>(dir, file_name, retain_hours, is_async);
   } else {
@@ -134,7 +134,7 @@ bool Logger::Init(const std::string& conf_path) {
     return false;
   }
 
-  // 默认不打印到控制台, 只会打印 error 和 fatal 的日志
+  // 默认不打印到控制台，只会打印 error 和 fatal 的日志
   is_console_output_ = false;
 
   return true;
@@ -152,7 +152,7 @@ void Logger::Log(Level log_level, const char* fmt, ...) {
   std::string new_fmt = GenLogPrefix() + kLevel2Description.at(log_level) + fmt;
   // FATAL 日志需要打印堆栈
   if (log_level == Level::FATAL_LEVEL) {
-    // 防止打印多个 FATAL 日志, 第一次收到 FATAL 日志后就不再接受日志
+    // 防止打印多个 FATAL 日志，第一次收到 FATAL 日志后就不再接受日志
     if (receive_fatal_.exchange(true)) {
       is_running_ = false;
       return;

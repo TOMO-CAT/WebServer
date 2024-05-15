@@ -4,8 +4,8 @@
 #include <list>
 #include <memory>
 
-#include "logger/backtrace.h"
 #include "logger/file_appender.h"
+#include "logger/log_backtrace.h"
 #include "logger/log_message.h"
 #include "util/sync/thread_safe_queue.hpp"
 

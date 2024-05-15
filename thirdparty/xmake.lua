@@ -1,0 +1,5 @@
+target("thirdparty.cpptoml", function()
+    set_kind("object")
+    add_rules("c++")
+    add_sysincludedirs("cpptoml/include", {public = true})
+end)

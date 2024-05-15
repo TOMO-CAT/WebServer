@@ -1,0 +1,7 @@
+target("logger", function()
+    set_kind("object")
+    add_files("*.cc|*_test.cc")
+    add_deps("util.toml", "util.macros", "thirdparty.cpptoml")
+    add_syslinks("pthread", "backtrace", "uuid")
+    add_sysincludedirs("/usr/lib/gcc/x86_64-linux-gnu/11/include", {public = true})
+end)

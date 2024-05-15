@@ -1,5 +1,4 @@
 #include "gtest/gtest.h"
-
 #include "util/macros/io.h"
 
 namespace util {
