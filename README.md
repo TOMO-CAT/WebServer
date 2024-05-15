@@ -25,6 +25,27 @@
 ## 搭建环境
 
 ```bash
+# 搭建 docker 镜像
+bash docker.sh build
+
+# 进入 docker
+bash docker.sh run
+```
+
+## 编译
+
+```bash
+# 编译
+make build
+
+# 生成 compile_commands.json
+make clangd
+
+# 运行全量单测
+make test
+
+# 单测覆盖率
+make coverage
 ```
 
 ## TODO

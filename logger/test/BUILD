@@ -42,3 +42,15 @@ cc_binary(
         'funny_test.cc',
     ],
 )
+
+cc_binary(
+    name='bench',
+    srcs=[
+        'bench.cc',
+    ],
+    deps=[
+        '//logger:logger',
+        '//util/time:time',
+        ':logger_test_gen',
+    ],
+)

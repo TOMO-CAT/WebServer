@@ -38,6 +38,7 @@
         "lstdc",
         "luuid",
         "mmap",
+        "muduo",
         "mylib",
         "newfd",
         "nlink",
