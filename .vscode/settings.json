@@ -44,16 +44,19 @@
         "nlink",
         "nptrs",
         "nullptr",
+        "NVAL",
         "oldfd",
         "ONONBLOCK",
         "ostream",
         "patsubst",
         "pdebug",
         "perror",
+        "POLLRDHUP",
         "POSIX",
         "ptype",
         "RAII",
         "rdev",
+        "RDHUP",
         "RDONLY",
         "RDWR",
         "retq",
@@ -206,7 +209,8 @@
     ],
     "cpplint.cpplintPath": "/usr/bin/cpplint",
     "cSpell.enableFiletypes": [
-        "!jsonc"
+        "!jsonc",
+        "!markdown",
     ],
     "[python]": {
         "editor.defaultFormatter": "ms-python.autopep8"

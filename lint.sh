@@ -45,11 +45,13 @@ function lint_single_directory() {
 EXCLUDE_FOLDER_LIST="
 thirdparty
 util/toml
+build
 build64_release
 docs
 .cache
 .git
 .vscode
+.xmake
 coverage_reports
 "
 

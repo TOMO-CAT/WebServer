@@ -1,0 +1,7 @@
+target("util.time.timestamp_test", function()
+    set_kind("binary")
+    set_default(false)
+    add_files("timestamp_test.cc")
+    add_tests("default")
+    add_packages("gtest")
+end)

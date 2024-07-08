@@ -4,7 +4,7 @@ add_rules("plugin.compile_commands.autoupdate", {outputdir = "."})
 
 -- 在 release 模式的基础上开启调试符号
 -- xmake f -m releasedbg
-add_rules("mode.releasedbg")
+add_rules("mode.releasedbg", "mode.debug")
 set_config("mode", "releasedbg")
 
 set_languages("c++17")
