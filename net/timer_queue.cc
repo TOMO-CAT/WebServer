@@ -72,15 +72,15 @@ void ResetTimerFd(const int timer_fd, const util::time::Timestamp expiration) {
 
 }  // namespace
 
-TimerQueue::TimerQueue(EventLoop* loop) : loop_(loop), timer_fd_(CreateTimerFd()), timer_fd_channel_(loop, timer_fd_) {
-  timer_fd_channel_.SetReadCallback(std::bind(&TimerQueue::HandleRead, this));
-  timer_fd_channel_.EnableReading();
+TimerQueue::TimerQueue(EventLoop* loop) : loop_(loop), timerfd_(CreateTimerFd()), timerfd_channel_(loop, timerfd_) {
+  timerfd_channel_.SetReadCallback(std::bind(&TimerQueue::HandleRead, this));
+  timerfd_channel_.EnableReading();
 }
 
 TimerQueue::~TimerQueue() {
-  timer_fd_channel_.DisableAll();
-  timer_fd_channel_.Remove();
-  ::close(timer_fd_);
+  timerfd_channel_.DisableAll();
+  timerfd_channel_.Remove();
+  ::close(timerfd_);
   // don't remove channel, since we're in EventLoop::dtor();
   for (const Entry& timer : timers_) {
     delete timer.second;
@@ -101,7 +101,7 @@ void TimerQueue::AddTimerInLoop(Timer* timer) {
   loop_->AssertInLoopThread();
   bool earliest_changed = Insert(timer);
   if (earliest_changed) {
-    ResetTimerFd(timer_fd_, timer->expiration());
+    ResetTimerFd(timerfd_, timer->expiration());
   }
 }
 
@@ -125,9 +125,9 @@ void TimerQueue::CancelInLoop(const TimerId& timer_id) {
 void TimerQueue::HandleRead() {
   loop_->AssertInLoopThread();
   util::time::Timestamp now = util::time::TimestampNanoSec();
-  ReadTimerFd(timer_fd_, now);
+  ReadTimerFd(timerfd_, now);
 
-  std::vector<Entry> expired = GetExpired(now);
+  std::vector<Entry> expired = RemoveExpiredTimers(now);
 
   calling_expired_timers_ = true;
   canceling_timers_.clear();
@@ -140,13 +140,23 @@ void TimerQueue::HandleRead() {
   Reset(expired, now);
 }
 
-std::vector<TimerQueue::Entry> TimerQueue::GetExpired(const util::time::Timestamp now) {
+/**
+ * @brief 从 timers_ 中移除已到期的 Timer
+ *
+ * @param now
+ * @return std::vector<TimerQueue::Entry>
+ */
+std::vector<TimerQueue::Entry> TimerQueue::RemoveExpiredTimers(const util::time::Timestamp now) {
   CHECK_EQ(timers_.size(), active_timers_.size());
   std::vector<Entry> expired;
-  Entry sentry(now, reinterpret_cast<Timer*>(UINTPTR_MAX));  // TODO: why?
+
+  // 哨兵值 (sentry) 作用是让 lower_bound 返回第一个未到期的 Timer 的迭代器
+  Entry sentry(now, reinterpret_cast<Timer*>(UINTPTR_MAX));
   TimerList::iterator end = timers_.lower_bound(sentry);
   CHECK(end == timers_.end() || now < end->first);
   std::copy(timers_.begin(), end, back_inserter(expired));
+
+  // 从 timers_ 中移除已到期的 Timer
   timers_.erase(timers_.begin(), end);
 
   for (const Entry& it : expired) {
@@ -157,6 +167,9 @@ std::vector<TimerQueue::Entry> TimerQueue::GetExpired(const util::time::Timestam
   }
 
   CHECK_EQ(timers_.size(), active_timers_.size());
+
+  // 编译器会实施 RVO (Return Value Optimization) 优化, 不必关心性能问题
+  // 必要时可以考虑像 EventLoop::active_channels_ 一样复用 vector
   return expired;
 }
 
@@ -179,7 +192,7 @@ void TimerQueue::Reset(const std::vector<Entry>& expired, const util::time::Time
   }
 
   if (next_expire > 0) {
-    ResetTimerFd(timer_fd_, next_expire);
+    ResetTimerFd(timerfd_, next_expire);
   }
 }
 
